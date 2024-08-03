@@ -27,10 +27,13 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    void _initializeTable();
+
+    void _initializeEntriesTable();
 
 private slots:
     void _addEntry();
     void _setEntryColumn(Col col, const QString& value);
+    void _addFood();
 };
+
 #endif // MAINWINDOW_H
