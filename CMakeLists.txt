@@ -16,34 +16,19 @@ set(PROJECT_SOURCES
         src/main.cpp
         src/mainwindow.cpp
         src/foodtable.cpp
+        src/addfoodwidget.cpp
         include/mainwindow.h
         include/food.h
         include/foodtable.h
+        include/addfoodwidget.h
         src/mainwindow.ui
+        src/addfoodwidget.ui
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(MacroCount
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET MacroCount APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-else()
-    if(ANDROID)
-        add_library(MacroCount SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(MacroCount
-            ${PROJECT_SOURCES}
-        )
-    endif()
-endif()
+qt_add_executable(MacroCount
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+)
 
 target_link_libraries(MacroCount PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_include_directories(MacroCount PUBLIC include)
@@ -62,6 +47,6 @@ install(TARGETS MacroCount
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(MacroCount)
-endif()
+
+qt_finalize_executable(MacroCount)
+

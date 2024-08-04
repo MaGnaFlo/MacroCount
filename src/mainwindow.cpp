@@ -4,6 +4,7 @@
 #include <QDate>
 #include <iostream>
 #include <QMouseEvent>
+#include "addfoodwidget.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -21,8 +22,16 @@ MainWindow::MainWindow(QWidget *parent)
     QDate date {QDate::currentDate()};
     ui->editDate->setDate(date);
 
+    ui->btnAddEntry->setEnabled(false);
+    ui->btnDeleteEntry->setEnabled(false);
+    ui->btnEditEntry->setEnabled(false);
+    ui->btnAddFood->setEnabled(false);
+    ui->btnDeleteFood->setEnabled(false);
+    ui->btnEditFood->setEnabled(false);
+
     connect(ui->btnAddEntry, &QPushButton::clicked, this, &MainWindow::_addEntry);
     connect(ui->btnAddFood, &QPushButton::clicked, this, &MainWindow::_addFood);
+    connect(ui->lineEditFoodName, &QLineEdit::textChanged, this, &MainWindow::_foodNameModified);
 }
 
 MainWindow::~MainWindow()
@@ -184,27 +193,20 @@ void MainWindow::_addEntry()
 
 void MainWindow::_addFood()
 {
-    Food food {ui->lineEditFoodName->text()};
-    auto foods {ui->tableFood->foods()};
-    if (std::find_if(foods.begin(), foods.end(), [&food](const Food& food_)
-                     {return food.name() == food_.name();}) != foods.end()) {
-        QMessageBox msgBox;
-        msgBox.setText("Food already exists");
-        msgBox.setInformativeText("The food you're trying to add already exists in the list.");
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setDefaultButton(QMessageBox::Ok);
-        msgBox.exec();
-        return;
-    }
-
-    QString densityText {ui->spinDensity->text()};
-    densityText.replace(",", ".");
-    food.setDensity(densityText.toDouble());
-    food.setMacronutrients(ui->spinUnsatFatPerc->text().toDouble(),
-                           ui->spinSatFatPerc->text().toDouble(),
-                           ui->spinCarbsPerc->text().toDouble(),
-                           ui->spinProtPerc->text().toDouble());
+    AddFoodWidget* foodWidget {new AddFoodWidget};
+    foodWidget->exec();
+    const Food& food {foodWidget->food()};
     ui->tableFood->addFood(food);
     ui->cbFood->addItem(food.name());
+}
+
+void MainWindow::_foodNameModified()
+{
+    const QString& foodName {ui->lineEditFoodName->text()};
+    if (!foodName.isEmpty()) {
+        ui->btnAddFood->setEnabled(true);
+    } else {
+        ui->btnAddFood->setEnabled(false);
+    }
 }
 

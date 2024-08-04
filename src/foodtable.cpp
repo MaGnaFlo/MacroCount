@@ -42,7 +42,7 @@ void FoodTable::addFood(const Food &food)
     this->_setCell(row, Col::CARBS, food.carbohydrates());
     this->_setCell(row, Col::PROTEINS, food.proteins());
 
-    _foods.push_back(food);
+    _foods.emplace_back(food);
 }
 
 void FoodTable::_setCell(int row, Col col, const QString &value)

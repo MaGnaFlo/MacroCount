@@ -29,13 +29,13 @@ protected:
     virtual void mousePressEvent(QMouseEvent* event) override;
 
 private:
-    Ui::MainWindow *ui;
-
     void _initializeEntriesTable();
+    Ui::MainWindow *ui;
 
 private slots:
     void _addEntry();
     void _addFood();
+    void _foodNameModified();
 };
 
 #endif // MAINWINDOW_H

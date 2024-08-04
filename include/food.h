@@ -7,6 +7,15 @@ class Food
 public:
     Food() {}
     explicit Food(const QString& name) : _name(name) {}
+    Food(const Food& other)
+    {
+        _name = other._name;
+        _density = other._density;
+        _unsaturatedFats = other._unsaturatedFats;
+        _saturatedFats = other._saturatedFats;
+        _carbohydrates = other._carbohydrates;
+        _proteins = other._proteins;
+    }
     void setMacronutrients(double unsaturatedFats, double saturatedFats, double carbohydrates, double proteins)
     {
         _unsaturatedFats = unsaturatedFats;
