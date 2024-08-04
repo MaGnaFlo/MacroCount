@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include <QMessageBox>
+#include <QDate>
+#include <iostream>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -13,6 +16,9 @@ MainWindow::MainWindow(QWidget *parent)
     for (const Food& food : ui->tableFood->foods()) {
         ui->cbFood->addItem(food.name());
     }
+
+    QDate date {QDate::currentDate()};
+    ui->editDate->setDate(date);
 
     connect(ui->btnAddEntry, &QPushButton::clicked, this, &MainWindow::_addEntry);
     connect(ui->btnAddFood, &QPushButton::clicked, this, &MainWindow::_addFood);
@@ -47,6 +53,8 @@ void MainWindow::_initializeEntriesTable()
     ui->tableEntries->setColumnWidth(5, 0.15*tableWidth);
     ui->tableEntries->setColumnWidth(6, 0.10*tableWidth);
     ui->tableEntries->verticalHeader()->setVisible(false);
+
+//    ui->tableEntries->setSpan(0, 0, 3, 1);
 }
 
 void MainWindow::_addEntry()
@@ -54,6 +62,16 @@ void MainWindow::_addEntry()
     const QString& foodName {ui->cbFood->currentText()};
     const auto foods {ui->tableFood->foods()};
     const auto food_it {std::find_if(foods.begin(), foods.cend(), [&foodName](const Food& food){return food.name() == foodName;})};
+
+    if (foods.empty()) {
+        QMessageBox msgBox;
+        msgBox.setText("No food available!");
+        msgBox.setInformativeText("No food selected. Add food items in the 'food' tab before adding entries in this table.");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.exec();
+        return;
+    }
 
     if (food_it == foods.cend()) {
         QMessageBox msgBox;
@@ -88,15 +106,53 @@ void MainWindow::_addEntry()
         return;
     }
 
-    ui->tableEntries->insertRow(0);
-    for (const auto& [col, value] : values) _setEntryColumn(col, value);
+    int row {-1};
+
+    bool dateExists {false};
+    bool found {false};
+
+    const QStringList decomposedCurrentDate {ui->editDate->text().split("/")};
+    int d {decomposedCurrentDate.at(0).toInt()};
+    int m {decomposedCurrentDate.at(1).toInt()};
+    int y {decomposedCurrentDate.at(2).toInt()};
+    const QDate currentDate {y, m, d};
+
+    for (int i = 0; i<ui->tableEntries->rowCount(); ++i) {
+        QLabel* label {dynamic_cast<QLabel*>(ui->tableEntries->cellWidget(i, 0))};
+        if (!label) {
+            continue;
+        }
+        const QStringList decomposedDate {label->text().split("/")};
+        int d {decomposedDate.at(0).toInt()};
+        int m {decomposedDate.at(1).toInt()};
+        int y {decomposedDate.at(2).toInt()};
+        const QDate date {y, m, d};
+
+        if (date == currentDate) {
+            int span {ui->tableEntries->rowSpan(i, 0)};
+            row = i+span;
+            ui->tableEntries->insertRow(row);
+            ui->tableEntries->setSpan(i, 0, span+1, 1);
+            break;
+        } else if (date < currentDate) {
+            row = i;
+            ui->tableEntries->insertRow(row);
+            break;
+        }
+    }
+
+    if (row == -1) {
+        row = ui->tableEntries->rowCount();
+        ui->tableEntries->insertRow(row);
+    }
+
+    for (const auto& [col, value] : values) _setEntryColumn(row, static_cast<int>(col), value);
 }
 
-void MainWindow::_setEntryColumn(Col col, const QString &value)
+void MainWindow::_setEntryColumn(int row, int col, const QString &value)
 {
-    int i {static_cast<int>(col)};
     QLabel* text = new QLabel {value};
-    ui->tableEntries->setCellWidget(0, i, text);
+    ui->tableEntries->setCellWidget(row, col, text);
 }
 
 void MainWindow::_addFood()

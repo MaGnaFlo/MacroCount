@@ -32,7 +32,7 @@ private:
 
 private slots:
     void _addEntry();
-    void _setEntryColumn(Col col, const QString& value);
+    void _setEntryColumn(int row, int col, const QString& value);
     void _addFood();
 };
 
