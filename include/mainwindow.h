@@ -25,6 +25,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+protected:
+    virtual void mousePressEvent(QMouseEvent* event) override;
+
 private:
     Ui::MainWindow *ui;
 
@@ -32,7 +35,6 @@ private:
 
 private slots:
     void _addEntry();
-    void _setEntryColumn(int row, int col, const QString& value);
     void _addFood();
 };
 

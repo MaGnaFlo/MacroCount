@@ -1,5 +1,8 @@
 #include "foodtable.h"
 #include <QHeaderView>
+#include <QMouseEvent>
+#include <iostream>
+
 
 FoodTable::FoodTable(QWidget *parent) : QTableWidget(parent)
 {
@@ -15,6 +18,16 @@ FoodTable::FoodTable(QWidget *parent) : QTableWidget(parent)
             "Carbohydrates\n(%)",
             "Proteins\n(%)"
         });
+    setAttribute ( Qt::WA_TransparentForMouseEvents );
+}
+
+int FoodTable::rowAt(QPoint pos)
+{
+    pos = mapFromGlobal(pos);
+    pos = {pos.x(), pos.y() - this->horizontalHeader()->height()};
+    int row {this->indexAt(pos).row()};
+    this->selectRow(row);
+    return row;
 }
 
 void FoodTable::addFood(const Food &food)
@@ -24,8 +37,8 @@ void FoodTable::addFood(const Food &food)
 
     this->_setCell(row, Col::NAME, food.name());
     this->_setCell(row, Col::DENSITY, food.density());
-    this->_setCell(row, Col::UNSATFAT, food.unsaturatedFats());
-    this->_setCell(row, Col::SATFAT, food.saturatedFats());
+    this->_setCell(row, Col::UNSATFATS, food.unsaturatedFats());
+    this->_setCell(row, Col::SATFATS, food.saturatedFats());
     this->_setCell(row, Col::CARBS, food.carbohydrates());
     this->_setCell(row, Col::PROTEINS, food.proteins());
 

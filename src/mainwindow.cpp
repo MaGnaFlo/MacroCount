@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QDate>
 #include <iostream>
+#include <QMouseEvent>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -29,6 +30,40 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::mousePressEvent(QMouseEvent *event)
+{
+    QPoint pos = mapToGlobal(event->pos());
+    int row {ui->tableFood->rowAt(pos)};
+
+    QLabel* foodName {dynamic_cast<QLabel*>(ui->tableFood->cellWidget(row, static_cast<int>(FoodTable::Col::NAME)))};
+    QLabel* foodDensity {dynamic_cast<QLabel*>(ui->tableFood->cellWidget(row, static_cast<int>(FoodTable::Col::DENSITY)))};
+    QLabel* foodUnsatFats {dynamic_cast<QLabel*>(ui->tableFood->cellWidget(row, static_cast<int>(FoodTable::Col::UNSATFATS)))};
+    QLabel* foodSatFats {dynamic_cast<QLabel*>(ui->tableFood->cellWidget(row, static_cast<int>(FoodTable::Col::SATFATS)))};
+    QLabel* foodCarbs {dynamic_cast<QLabel*>(ui->tableFood->cellWidget(row, static_cast<int>(FoodTable::Col::CARBS)))};
+    QLabel* foodProteins {dynamic_cast<QLabel*>(ui->tableFood->cellWidget(row, static_cast<int>(FoodTable::Col::PROTEINS)))};
+
+    if (foodName) {
+        ui->lineEditFoodName->setText(foodName->text());
+    }
+    if (foodDensity) {
+        ui->spinDensity->setValue(foodDensity->text().toDouble());
+    }
+    if (foodUnsatFats) {
+        ui->spinUnsatFatPerc->setValue(foodUnsatFats->text().toDouble());
+    }
+    if (foodSatFats) {
+        ui->spinSatFatPerc->setValue(foodSatFats->text().toDouble());
+    }
+    if (foodCarbs) {
+        ui->spinCarbsPerc->setValue(foodCarbs->text().toDouble());
+    }
+    if (foodProteins) {
+        ui->spinProtPerc->setValue(foodProteins->text().toDouble());
+    }
+
+    QMainWindow::mousePressEvent(event);
+}
+
 void MainWindow::_initializeEntriesTable()
 {
     ui->tableEntries->setRowCount(0);
@@ -53,8 +88,6 @@ void MainWindow::_initializeEntriesTable()
     ui->tableEntries->setColumnWidth(5, 0.15*tableWidth);
     ui->tableEntries->setColumnWidth(6, 0.10*tableWidth);
     ui->tableEntries->verticalHeader()->setVisible(false);
-
-//    ui->tableEntries->setSpan(0, 0, 3, 1);
 }
 
 void MainWindow::_addEntry()
@@ -108,9 +141,6 @@ void MainWindow::_addEntry()
 
     int row {-1};
 
-    bool dateExists {false};
-    bool found {false};
-
     const QStringList decomposedCurrentDate {ui->editDate->text().split("/")};
     int d {decomposedCurrentDate.at(0).toInt()};
     int m {decomposedCurrentDate.at(1).toInt()};
@@ -146,13 +176,10 @@ void MainWindow::_addEntry()
         ui->tableEntries->insertRow(row);
     }
 
-    for (const auto& [col, value] : values) _setEntryColumn(row, static_cast<int>(col), value);
-}
-
-void MainWindow::_setEntryColumn(int row, int col, const QString &value)
-{
-    QLabel* text = new QLabel {value};
-    ui->tableEntries->setCellWidget(row, col, text);
+    for (const auto& [col, value] : values) {
+        QLabel* text = new QLabel {value};
+        ui->tableEntries->setCellWidget(row, static_cast<int>(col), text);
+    }
 }
 
 void MainWindow::_addFood()
@@ -170,7 +197,9 @@ void MainWindow::_addFood()
         return;
     }
 
-    food.setDensity(ui->spinDensity->text().toDouble());
+    QString densityText {ui->spinDensity->text()};
+    densityText.replace(",", ".");
+    food.setDensity(densityText.toDouble());
     food.setMacronutrients(ui->spinUnsatFatPerc->text().toDouble(),
                            ui->spinSatFatPerc->text().toDouble(),
                            ui->spinCarbsPerc->text().toDouble(),

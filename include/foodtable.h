@@ -1,26 +1,33 @@
 #pragma once
 
 #include <QTableWidget>
+#include <QHeaderView>
 #include <vector>
 #include <QLabel>
-#include <concepts>
+#include <iostream>
 #include "food.h"
+
 
 namespace Ui { class FoodTable; }
 
 class FoodTable : public QTableWidget
 {
+    Q_OBJECT
+
 public:
     enum class Col {
         NAME = 0,
         DENSITY,
-        UNSATFAT,
-        SATFAT,
+        UNSATFATS,
+        SATFATS,
         CARBS,
         PROTEINS
     };
     explicit FoodTable(QWidget *parent = nullptr);
     std::vector<Food> foods() const {return _foods;}
+
+    int rowAt(QPoint pos);
+
 
 public slots:
     void addFood(const Food& food);
