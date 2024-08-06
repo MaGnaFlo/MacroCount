@@ -25,13 +25,15 @@ MainWindow::MainWindow(QWidget *parent)
     ui->btnAddEntry->setEnabled(false);
     ui->btnDeleteEntry->setEnabled(false);
     ui->btnEditEntry->setEnabled(false);
-    ui->btnAddFood->setEnabled(false);
+
+    ui->btnAddFood->setEnabled(true);
     ui->btnDeleteFood->setEnabled(false);
     ui->btnEditFood->setEnabled(false);
 
     connect(ui->btnAddEntry, &QPushButton::clicked, this, &MainWindow::_addEntry);
     connect(ui->btnAddFood, &QPushButton::clicked, this, &MainWindow::_addFood);
-    connect(ui->lineEditFoodName, &QLineEdit::textChanged, this, &MainWindow::_foodNameModified);
+    connect(ui->btnEditFood, &QPushButton::clicked, this, &MainWindow::_editFood);
+    connect(ui->btnDeleteFood, &QPushButton::clicked, this, &MainWindow::_deleteFood);
 }
 
 MainWindow::~MainWindow()
@@ -44,30 +46,9 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
     QPoint pos = mapToGlobal(event->pos());
     int row {ui->tableFood->rowAt(pos)};
 
-    QLabel* foodName {dynamic_cast<QLabel*>(ui->tableFood->cellWidget(row, static_cast<int>(FoodTable::Col::NAME)))};
-    QLabel* foodDensity {dynamic_cast<QLabel*>(ui->tableFood->cellWidget(row, static_cast<int>(FoodTable::Col::DENSITY)))};
-    QLabel* foodUnsatFats {dynamic_cast<QLabel*>(ui->tableFood->cellWidget(row, static_cast<int>(FoodTable::Col::UNSATFATS)))};
-    QLabel* foodSatFats {dynamic_cast<QLabel*>(ui->tableFood->cellWidget(row, static_cast<int>(FoodTable::Col::SATFATS)))};
-    QLabel* foodCarbs {dynamic_cast<QLabel*>(ui->tableFood->cellWidget(row, static_cast<int>(FoodTable::Col::CARBS)))};
-    QLabel* foodProteins {dynamic_cast<QLabel*>(ui->tableFood->cellWidget(row, static_cast<int>(FoodTable::Col::PROTEINS)))};
-
-    if (foodName) {
-        ui->lineEditFoodName->setText(foodName->text());
-    }
-    if (foodDensity) {
-        ui->spinDensity->setValue(foodDensity->text().toDouble());
-    }
-    if (foodUnsatFats) {
-        ui->spinUnsatFatPerc->setValue(foodUnsatFats->text().toDouble());
-    }
-    if (foodSatFats) {
-        ui->spinSatFatPerc->setValue(foodSatFats->text().toDouble());
-    }
-    if (foodCarbs) {
-        ui->spinCarbsPerc->setValue(foodCarbs->text().toDouble());
-    }
-    if (foodProteins) {
-        ui->spinProtPerc->setValue(foodProteins->text().toDouble());
+    if (row != -1) {
+        ui->btnDeleteFood->setEnabled(true);
+        ui->btnEditFood->setEnabled(true);
     }
 
     QMainWindow::mousePressEvent(event);
@@ -97,6 +78,80 @@ void MainWindow::_initializeEntriesTable()
     ui->tableEntries->setColumnWidth(5, 0.15*tableWidth);
     ui->tableEntries->setColumnWidth(6, 0.10*tableWidth);
     ui->tableEntries->verticalHeader()->setVisible(false);
+}
+
+Food MainWindow::_rowToFood(int row) const
+{
+    Food food;
+    for (int i = 0; i < ui->tableFood->columnCount(); ++i) {
+        FoodTable::Col col {static_cast<FoodTable::Col>(i)};
+        auto cellWidget {ui->tableFood->cellWidget(row, i)};
+        if (!cellWidget) {
+            continue;
+        }
+        QLabel* label {dynamic_cast<QLabel*>(cellWidget)};
+        if (!label) {
+            continue;
+        }
+
+        switch (col) {
+        case FoodTable::Col::NAME:
+            food.setName(label->text());
+            break;
+        case FoodTable::Col::UNSATFATS:
+            food.setUnsaturatedFats(label->text().toDouble());
+            break;
+        case FoodTable::Col::SATFATS:
+            food.setSaturatedFats(label->text().toDouble());
+            break;
+        case FoodTable::Col::CARBS:
+            food.setCarbohydrates(label->text().toDouble());
+            break;
+        case FoodTable::Col::PROTEINS:
+            food.setProteins(label->text().toDouble());
+            break;
+        case FoodTable::Col::DENSITY:
+            food.setDensity(label->text().toDouble());
+            break;
+        }
+    }
+    return food;
+}
+
+void MainWindow::_foodToRow(const Food& food, int row) const
+{
+    for (int i = 0; i < ui->tableFood->columnCount(); ++i) {
+        FoodTable::Col col {static_cast<FoodTable::Col>(i)};
+        auto cellWidget {ui->tableFood->cellWidget(row, i)};
+        if (!cellWidget) {
+            continue;
+        }
+        QLabel* label {dynamic_cast<QLabel*>(cellWidget)};
+        if (!label) {
+            continue;
+        }
+
+        switch (col) {
+        case FoodTable::Col::NAME:
+            label->setText(food.name());
+            break;
+        case FoodTable::Col::UNSATFATS:
+            label->setText(QString::number(food.unsaturatedFats()));
+            break;
+        case FoodTable::Col::SATFATS:
+            label->setText(QString::number(food.saturatedFats()));
+            break;
+        case FoodTable::Col::CARBS:
+            label->setText(QString::number(food.carbohydrates()));
+            break;
+        case FoodTable::Col::PROTEINS:
+            label->setText(QString::number(food.proteins()));
+            break;
+        case FoodTable::Col::DENSITY:
+            label->setText(QString::number(food.density()));
+            break;
+        }
+    }
 }
 
 void MainWindow::_addEntry()
@@ -194,19 +249,36 @@ void MainWindow::_addEntry()
 void MainWindow::_addFood()
 {
     AddFoodWidget* foodWidget {new AddFoodWidget};
-    foodWidget->exec();
-    const Food& food {foodWidget->food()};
-    ui->tableFood->addFood(food);
-    ui->cbFood->addItem(food.name());
+    if (foodWidget->exec() == QDialog::Accepted) {
+        const Food& food {foodWidget->food()};
+        ui->tableFood->addFood(food);
+        ui->cbFood->addItem(food.name());
+    }
 }
 
-void MainWindow::_foodNameModified()
+void MainWindow::_editFood()
 {
-    const QString& foodName {ui->lineEditFoodName->text()};
-    if (!foodName.isEmpty()) {
-        ui->btnAddFood->setEnabled(true);
-    } else {
-        ui->btnAddFood->setEnabled(false);
+    const QItemSelectionModel* selectionModel {ui->tableFood->selectionModel()};
+    const auto rowsModel {selectionModel->selectedRows()};
+    int row {rowsModel.at(0).row()};
+    const Food foodAtRow {_rowToFood(row)};
+
+    AddFoodWidget* foodWidget {new AddFoodWidget {foodAtRow}};
+    if (foodWidget->exec() == QDialog::Accepted) {
+        const Food& food {foodWidget->food()};
+        _foodToRow(food, row);
     }
+}
+
+void MainWindow::_deleteFood()
+{
+    const QItemSelectionModel* selectionModel {ui->tableFood->selectionModel()};
+    const auto rowsModel {selectionModel->selectedRows()};
+    int row {rowsModel.at(0).row()};
+
+    ui->tableFood->removeRow(row);
+    ui->tableFood->clearSelection();
+    ui->btnDeleteFood->setEnabled(false);
+    ui->btnEditFood->setEnabled(false);
 }
 

@@ -17,11 +17,12 @@ class AddFoodWidget : public QDialog
 
 public:
     AddFoodWidget(QWidget *parent = nullptr);
+    AddFoodWidget(const Food& food, QWidget *parent = nullptr);
     ~AddFoodWidget();
     const Food& food() const {return _food;}
 
 private slots:
-    void add();
+    void validate();
 
 private:
     Ui::AddFoodWidget *ui;

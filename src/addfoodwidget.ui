@@ -152,7 +152,7 @@
   <widget class="QDoubleSpinBox" name="spinDensity">
    <property name="geometry">
     <rect>
-     <x>80</x>
+     <x>70</x>
      <y>60</y>
      <width>62</width>
      <height>22</height>
@@ -175,14 +175,14 @@
   <widget class="QLineEdit" name="lineEditFoodName">
    <property name="geometry">
     <rect>
-     <x>80</x>
+     <x>70</x>
      <y>20</y>
-     <width>113</width>
+     <width>181</width>
      <height>21</height>
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="btnAdd">
+  <widget class="QPushButton" name="btnAddEdit">
    <property name="geometry">
     <rect>
      <x>150</x>
@@ -192,7 +192,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Add</string>
+    <string>Ok</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btnCancel">
@@ -206,6 +206,19 @@
    </property>
    <property name="text">
     <string>Cancel</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>60</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Not applicable</string>
    </property>
   </widget>
  </widget>

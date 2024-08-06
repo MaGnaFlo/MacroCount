@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "food.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -30,12 +31,15 @@ protected:
 
 private:
     void _initializeEntriesTable();
+    Food _rowToFood(int row) const;
+    void _foodToRow(const Food &food, int row) const;
     Ui::MainWindow *ui;
 
 private slots:
     void _addEntry();
     void _addFood();
-    void _foodNameModified();
+    void _editFood();
+    void _deleteFood();
 };
 
 #endif // MAINWINDOW_H

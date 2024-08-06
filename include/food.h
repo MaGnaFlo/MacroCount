@@ -23,7 +23,6 @@ public:
         _carbohydrates = carbohydrates;
         _proteins = proteins;
     }
-    void setDensity(double density) {_density = density;}
 
     const QString& name() const {return _name;}
     double density() const {return _density;}
@@ -31,6 +30,13 @@ public:
     double unsaturatedFats() const {return _unsaturatedFats;}
     double carbohydrates() const {return _carbohydrates;}
     double proteins() const {return _proteins;}
+
+    void setName(const QString& name) {_name = name;}
+    void setDensity(double density) {_density = density;}
+    void setUnsaturatedFats(double unsaturatedFats) {_unsaturatedFats = unsaturatedFats;}
+    void setSaturatedFats(double saturatedFats) {_saturatedFats = saturatedFats;}
+    void setCarbohydrates(double carbohydrates) {_carbohydrates = carbohydrates;}
+    void setProteins(double proteins) {_proteins = proteins;}
 
 private:
     QString _name;
