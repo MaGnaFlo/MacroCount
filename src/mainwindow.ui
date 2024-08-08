@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="entriesTab">
      <attribute name="title">
@@ -69,7 +69,7 @@
        <string>Edit</string>
       </property>
      </widget>
-     <widget class="QTableWidget" name="tableEntries">
+     <widget class="EntryTable" name="tableEntries">
       <property name="geometry">
        <rect>
         <x>20</x>
@@ -167,7 +167,7 @@
        <rect>
         <x>50</x>
         <y>60</y>
-        <width>101</width>
+        <width>91</width>
         <height>91</height>
        </rect>
       </property>
@@ -226,6 +226,11 @@
    <class>FoodTable</class>
    <extends>QTableWidget</extends>
    <header>foodtable.h</header>
+  </customwidget>
+  <customwidget>
+   <class>EntryTable</class>
+   <extends>QTableWidget</extends>
+   <header location="global">entrytable.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

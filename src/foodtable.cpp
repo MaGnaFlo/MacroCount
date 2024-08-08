@@ -4,7 +4,7 @@
 #include <iostream>
 
 
-FoodTable::FoodTable(QWidget *parent) : QTableWidget(parent)
+FoodTable::FoodTable(QWidget *parent) : ItemTable(parent)
 {
     this->setColumnCount(6);
     this->setRowCount(0);
@@ -21,38 +21,93 @@ FoodTable::FoodTable(QWidget *parent) : QTableWidget(parent)
     setAttribute ( Qt::WA_TransparentForMouseEvents );
 }
 
-int FoodTable::rowAt(QPoint pos)
+void FoodTable::add(std::unique_ptr<Item> item)
 {
-    pos = mapFromGlobal(pos);
-    pos = {pos.x(), pos.y() - this->horizontalHeader()->height()};
-    int row {this->indexAt(pos).row()};
-    this->selectRow(row);
-    return row;
-}
+    std::unique_ptr<Food> food {dynamic_cast<Food*>(item.release())};
 
-void FoodTable::addFood(const Food &food)
-{
     int row {rowCount()};
     this->insertRow(row);
 
-    this->_setCell(row, Col::NAME, food.name());
-    this->_setCell(row, Col::DENSITY, food.density());
-    this->_setCell(row, Col::UNSATFATS, food.unsaturatedFats());
-    this->_setCell(row, Col::SATFATS, food.saturatedFats());
-    this->_setCell(row, Col::CARBS, food.carbohydrates());
-    this->_setCell(row, Col::PROTEINS, food.proteins());
+    setCellWidget(row, static_cast<int>(Col::NAME), new QLabel {food->name()});
+    setCellWidget(row, static_cast<int>(Col::DENSITY), new QLabel {QString::number(food->density())});
+    setCellWidget(row, static_cast<int>(Col::UNSATFATS), new QLabel {QString::number(food->unsaturatedFats())});
+    setCellWidget(row, static_cast<int>(Col::SATFATS), new QLabel {QString::number(food->saturatedFats())});
+    setCellWidget(row, static_cast<int>(Col::CARBS), new QLabel {QString::number(food->carbohydrates())});
+    setCellWidget(row, static_cast<int>(Col::PROTEINS), new QLabel {QString::number(food->proteins())});
 
-    _foods.emplace_back(food);
+    _items.push_back(std::move(food));
 }
 
-void FoodTable::_setCell(int row, Col col, const QString &value)
+Food FoodTable::foodFromRow(int row) const
 {
-    QLabel *label {new QLabel{value}};
-    setCellWidget(row, static_cast<int>(col), label);
+    Food food;
+    for (int i = 0; i < columnCount(); ++i) {
+        FoodTable::Col col {static_cast<FoodTable::Col>(i)};
+        auto cellWidget {this->cellWidget(row, i)};
+        if (!cellWidget) {
+            continue;
+        }
+        QLabel* label {dynamic_cast<QLabel*>(cellWidget)};
+        if (!label) {
+            continue;
+        }
+
+        switch (col) {
+        case FoodTable::Col::NAME:
+            food.setName(label->text());
+            break;
+        case FoodTable::Col::UNSATFATS:
+            food.setUnsaturatedFats(label->text().toDouble());
+            break;
+        case FoodTable::Col::SATFATS:
+            food.setSaturatedFats(label->text().toDouble());
+            break;
+        case FoodTable::Col::CARBS:
+            food.setCarbohydrates(label->text().toDouble());
+            break;
+        case FoodTable::Col::PROTEINS:
+            food.setProteins(label->text().toDouble());
+            break;
+        case FoodTable::Col::DENSITY:
+            food.setDensity(label->text().toDouble());
+            break;
+        }
+    }
+    return food;
 }
 
-void FoodTable::_setCell(int row, Col col, double value)
+void FoodTable::fillRowFromFood(int row, const Food &food)
 {
-    QLabel *label {new QLabel{QString::number(value)}};
-    setCellWidget(row, static_cast<int>(col), label);
+    for (int i = 0; i < columnCount(); ++i) {
+        FoodTable::Col col {static_cast<FoodTable::Col>(i)};
+        auto cellWidget {this->cellWidget(row, i)};
+        if (!cellWidget) {
+            continue;
+        }
+        QLabel* label {dynamic_cast<QLabel*>(cellWidget)};
+        if (!label) {
+            continue;
+        }
+
+        switch (col) {
+        case FoodTable::Col::NAME:
+            label->setText(food.name());
+            break;
+        case FoodTable::Col::UNSATFATS:
+            label->setText(QString::number(food.unsaturatedFats()));
+            break;
+        case FoodTable::Col::SATFATS:
+            label->setText(QString::number(food.saturatedFats()));
+            break;
+        case FoodTable::Col::CARBS:
+            label->setText(QString::number(food.carbohydrates()));
+            break;
+        case FoodTable::Col::PROTEINS:
+            label->setText(QString::number(food.proteins()));
+            break;
+        case FoodTable::Col::DENSITY:
+            label->setText(QString::number(food.density()));
+            break;
+        }
+    }
 }

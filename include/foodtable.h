@@ -5,12 +5,13 @@
 #include <vector>
 #include <QLabel>
 #include <iostream>
-#include "food.h"
+#include "item.h"
+#include "itemtable.h"
 
 
 namespace Ui { class FoodTable; }
 
-class FoodTable : public QTableWidget
+class FoodTable : public ItemTable
 {
     Q_OBJECT
 
@@ -24,16 +25,11 @@ public:
         PROTEINS
     };
     explicit FoodTable(QWidget *parent = nullptr);
-    std::vector<Food> foods() const {return _foods;}
+    virtual ~FoodTable() {}
 
-    int rowAt(QPoint pos);
+    virtual void add(std::unique_ptr<Item> item);
 
+    Food foodFromRow(int row) const;
+    void fillRowFromFood(int row, const Food& food);
 
-public slots:
-    void addFood(const Food& food);
-
-private:
-    void _setCell(int row, Col col, const QString& value);
-    void _setCell(int row, Col col, double value);
-    std::vector<Food> _foods;
 };

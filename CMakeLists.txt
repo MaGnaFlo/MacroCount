@@ -15,12 +15,18 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 set(PROJECT_SOURCES
         src/main.cpp
         src/mainwindow.cpp
+        src/itemtable.cpp
+        src/entrytable.cpp
         src/foodtable.cpp
         src/addfoodwidget.cpp
+
         include/mainwindow.h
-        include/food.h
+        include/item.h
+        include/itemtable.h
+        include/entrytable.h
         include/foodtable.h
         include/addfoodwidget.h
+
         src/mainwindow.ui
         src/addfoodwidget.ui
 )

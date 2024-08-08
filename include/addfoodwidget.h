@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QWidget>
 #include <QDialog>
-#include "food.h"
+#include "item.h"
 
 
 QT_BEGIN_NAMESPACE
