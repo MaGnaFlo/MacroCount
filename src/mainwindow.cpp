@@ -56,6 +56,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 void MainWindow::_addEntry()
 {
     AddEntryWidget* entryWidget {new AddEntryWidget{ui->tableFood->items(), this}};
+    entryWidget->setWindowTitle("Add new entry");
     if (entryWidget->exec() == QDialog::Accepted) {
         std::unique_ptr<Entry> entry {std::make_unique<Entry>(entryWidget->entry())};
         ui->tableEntries->add(std::move(entry));
@@ -70,6 +71,7 @@ void MainWindow::_editEntry()
     const Entry entryAtRow {ui->tableEntries->entryFromRow(row)};
 
     AddEntryWidget* entryWidget {new AddEntryWidget {entryAtRow, ui->tableFood->items(), this}};
+    entryWidget->setWindowTitle("Edit entry");
     if (entryWidget->exec() == QDialog::Accepted) {
         const Entry& entry {entryWidget->entry()};
         ui->tableEntries->fillRowFromEntry(row, entry);
@@ -82,7 +84,7 @@ void MainWindow::_deleteEntry()
     const auto rowsModel {selectionModel->selectedRows()};
     int row {rowsModel.at(0).row()};
 
-    ui->tableEntries->removeRow(row);
+    ui->tableEntries->remove(row);
     ui->tableEntries->clearSelection();
     ui->btnDeleteEntry->setEnabled(false);
     ui->btnEditEntry->setEnabled(false);
@@ -91,6 +93,7 @@ void MainWindow::_deleteEntry()
 void MainWindow::_addFood()
 {
     AddFoodWidget* foodWidget {new AddFoodWidget};
+    foodWidget->setWindowTitle("Add new food");
     if (foodWidget->exec() == QDialog::Accepted) {
         std::unique_ptr<Food> food {std::make_unique<Food>(foodWidget->food())};
         ui->tableFood->add(std::move(food));
@@ -105,6 +108,7 @@ void MainWindow::_editFood()
     const Food foodAtRow {ui->tableFood->foodFromRow(row)};
 
     AddFoodWidget* foodWidget {new AddFoodWidget {foodAtRow}};
+    foodWidget->setWindowTitle("Edit food");
     if (foodWidget->exec() == QDialog::Accepted) {
         const Food& food {foodWidget->food()};
         ui->tableFood->fillRowFromFood(row, food);
@@ -115,9 +119,9 @@ void MainWindow::_deleteFood()
 {
     const QItemSelectionModel* selectionModel {ui->tableFood->selectionModel()};
     const auto rowsModel {selectionModel->selectedRows()};
-    int row {rowsModel.at(0).row()};
 
-    ui->tableFood->removeRow(row);
+    int row {rowsModel.at(0).row()};
+    ui->tableFood->remove(row);
     ui->tableFood->clearSelection();
     ui->btnDeleteFood->setEnabled(false);
     ui->btnEditFood->setEnabled(false);

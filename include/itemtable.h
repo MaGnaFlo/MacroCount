@@ -15,18 +15,12 @@ class ItemTable : public QTableWidget
 
 public:
     explicit ItemTable(QWidget *parent = nullptr) : QTableWidget(parent) {}
-    virtual int rowAt(QPoint pos)
-    {
-        pos = mapFromGlobal(pos);
-        pos = {pos.x(), pos.y() - this->horizontalHeader()->height()};
-        int row {this->indexAt(pos).row()};
-        this->selectRow(row);
-        return row;
-    }
+    int rowAt(QPoint pos);
     virtual void add(std::unique_ptr<Item> item) = 0;
+    void remove(int row);
     virtual void setColumnsWidth() {}
-    std::vector<std::unique_ptr<Item>>& items() {return _items;}
+    std::map<int, std::unique_ptr<Item>>& items() {return _items;}
 
 protected:
-    std::vector<std::unique_ptr<Item>> _items;
+    std::map<int, std::unique_ptr<Item>> _items;
 };

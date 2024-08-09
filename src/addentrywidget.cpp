@@ -3,14 +3,14 @@
 #include <QMessageBox>
 
 
-AddEntryWidget::AddEntryWidget(std::vector<std::unique_ptr<Item>> &foods, QWidget *parent)
+AddEntryWidget::AddEntryWidget(std::map<int, std::unique_ptr<Item> > &foods, QWidget *parent)
     : QDialog(parent), ui(new Ui::AddEntryWidget), _foods(foods)
 {
     ui->setupUi(this);
     ui->editDate->setDate(QDate::currentDate());
     ui->cbFood->addItem("Select food");
     for (const auto& item : foods) {
-        auto food {dynamic_cast<Food*>(item.get())};
+        auto food {dynamic_cast<Food*>(item.second.get())};
         if (!food) continue;
         ui->cbFood->addItem(food->name());
     }
@@ -19,14 +19,14 @@ AddEntryWidget::AddEntryWidget(std::vector<std::unique_ptr<Item>> &foods, QWidge
     connect(ui->btnCancel, &QPushButton::clicked, this, &AddEntryWidget::reject);
 }
 
-AddEntryWidget::AddEntryWidget(const Entry &entry, std::vector<std::unique_ptr<Item> > &foods, QWidget *parent)
+AddEntryWidget::AddEntryWidget(const Entry &entry, std::map<int, std::unique_ptr<Item> > &foods, QWidget *parent)
     : QDialog(parent), ui(new Ui::AddEntryWidget), _foods(foods), _entry(entry)
 {
     ui->setupUi(this);
     ui->editDate->setDate(QDate::currentDate());
     ui->spinMass->setValue(entry.mass());
     ui->cbFood->addItem("Select food");
-    for (const auto& item : foods) {
+    for (const auto& [_, item] : foods) {
         auto food {dynamic_cast<Food*>(item.get())};
         if (!food) continue;
         ui->cbFood->addItem(food->name());
@@ -46,7 +46,7 @@ void AddEntryWidget::validate()
     const QString& foodName {ui->cbFood->currentText()};
     auto itemIt {std::find_if(_foods.cbegin(), _foods.cend(), [&foodName](const auto& foodItem)
                              {
-                                 const auto& food {dynamic_cast<Food*>(foodItem.get())};
+                                 const auto& food {dynamic_cast<Food*>(foodItem.second.get())};
                                  return food->name() == foodName;
                              }
     )};
@@ -71,7 +71,7 @@ void AddEntryWidget::validate()
         return;
     }
 
-    auto foodPtr = dynamic_cast<Food*>(itemIt->get());
+    auto foodPtr = dynamic_cast<Food*>((*itemIt).second.get());
     const Food foodCpy {*foodPtr}; // stack copy
     _entry = Entry(foodCpy, ui->editDate->text(), ui->spinMass->text().toDouble());
 

@@ -35,7 +35,7 @@ void FoodTable::add(std::unique_ptr<Item> item)
     setCellWidget(row, static_cast<int>(Col::CARBS), new QLabel {QString::number(food->carbohydrates())});
     setCellWidget(row, static_cast<int>(Col::PROTEINS), new QLabel {QString::number(food->proteins())});
 
-    _items.push_back(std::move(food));
+    _items.insert({row, std::move(food)});
 }
 
 Food FoodTable::foodFromRow(int row) const

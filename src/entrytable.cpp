@@ -74,14 +74,13 @@ void EntryTable::add(std::unique_ptr<Item> item)
     setCellWidget(row, static_cast<int>(Col::CARBS), new QLabel {QString::number(entry->carbohydrates())});
     setCellWidget(row, static_cast<int>(Col::PROTEINS), new QLabel {QString::number(entry->proteins())});
 
-    _items.push_back(std::move(item));
+    _items.insert({row, std::move(item)});
 
 }
 
 void EntryTable::setColumnsWidth()
 {
     int tableWidth {this->width()};
-    std::cout << tableWidth << std::endl;
     this->setColumnWidth(0, 0.15*tableWidth);
     this->setColumnWidth(1, 0.2*tableWidth);
     this->setColumnWidth(2, 0.099*tableWidth);
