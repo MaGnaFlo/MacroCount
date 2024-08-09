@@ -19,6 +19,7 @@ set(PROJECT_SOURCES
         src/entrytable.cpp
         src/foodtable.cpp
         src/addfoodwidget.cpp
+        src/addentrywidget.cpp
 
         include/mainwindow.h
         include/item.h
@@ -26,9 +27,11 @@ set(PROJECT_SOURCES
         include/entrytable.h
         include/foodtable.h
         include/addfoodwidget.h
+        include/addentrywidget.h
 
         src/mainwindow.ui
         src/addfoodwidget.ui
+        src/addentrywidget.ui
 )
 
 qt_add_executable(MacroCount

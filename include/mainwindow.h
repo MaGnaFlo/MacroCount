@@ -24,6 +24,8 @@ private:
 
 private slots:
     void _addEntry();
+    void _editEntry();
+    void _deleteEntry();
     void _addFood();
     void _editFood();
     void _deleteFood();

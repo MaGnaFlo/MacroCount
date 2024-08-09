@@ -6,6 +6,7 @@
 #include <QMouseEvent>
 #include "addfoodwidget.h"
 #include "entrytable.h"
+#include "addentrywidget.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -16,15 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->tableEntries->setColumnsWidth();
 
-    for (const std::unique_ptr<Item>& item : ui->tableFood->items()) {
-        const auto food {dynamic_cast<Food*>(item.get())};
-        ui->cbFood->addItem(food->name());
-    }
-
-    QDate date {QDate::currentDate()};
-    ui->editDate->setDate(date);
-
-    ui->btnAddEntry->setEnabled(false);
+    ui->btnAddEntry->setEnabled(true);
     ui->btnDeleteEntry->setEnabled(false);
     ui->btnEditEntry->setEnabled(false);
 
@@ -32,13 +25,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->btnDeleteFood->setEnabled(false);
     ui->btnEditFood->setEnabled(false);
 
-    ui->cbFood->addItem("Select food");
-
     connect(ui->btnAddEntry, &QPushButton::clicked, this, &MainWindow::_addEntry);
+    connect(ui->btnEditEntry, &QPushButton::clicked, this, &MainWindow::_editEntry);
+    connect(ui->btnDeleteEntry, &QPushButton::clicked, this, &MainWindow::_deleteEntry);
     connect(ui->btnAddFood, &QPushButton::clicked, this, &MainWindow::_addFood);
     connect(ui->btnEditFood, &QPushButton::clicked, this, &MainWindow::_editFood);
     connect(ui->btnDeleteFood, &QPushButton::clicked, this, &MainWindow::_deleteFood);
-    connect(ui->cbFood, &QComboBox::currentIndexChanged, this, &MainWindow::_cbFoodChanged);
 }
 
 MainWindow::~MainWindow()
@@ -63,39 +55,37 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 
 void MainWindow::_addEntry()
 {
-    const QString& foodName {ui->cbFood->currentText()};
-    const auto& foodItems {ui->tableFood->items()};
-    auto itemIt {std::find_if(foodItems.begin(), foodItems.end(), [&foodName](const auto& foodItem)
-        {
-            const auto& food {dynamic_cast<Food*>(foodItem.get())};
-            return food->name() == foodName;
-        }
-    )};
-
-    if (foodItems.empty()) {
-        QMessageBox msgBox;
-        msgBox.setText("No food available!");
-        msgBox.setInformativeText("No food selected. Add food items in the 'food' tab before adding entries in this table.");
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setDefaultButton(QMessageBox::Ok);
-        msgBox.exec();
-        return;
+    AddEntryWidget* entryWidget {new AddEntryWidget{ui->tableFood->items(), this}};
+    if (entryWidget->exec() == QDialog::Accepted) {
+        std::unique_ptr<Entry> entry {std::make_unique<Entry>(entryWidget->entry())};
+        ui->tableEntries->add(std::move(entry));
     }
+}
 
-    if (itemIt == foodItems.cend()) {
-        QMessageBox msgBox;
-        msgBox.setText("Could not add entry");
-        msgBox.setInformativeText("An unexpected error occurred.\nCould not add entry.");
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setDefaultButton(QMessageBox::Ok);
-        msgBox.exec();
-        return;
+void MainWindow::_editEntry()
+{
+    const QItemSelectionModel* selectionModel {ui->tableEntries->selectionModel()};
+    const auto rowsModel {selectionModel->selectedRows()};
+    int row {rowsModel.at(0).row()};
+    const Entry entryAtRow {ui->tableEntries->entryFromRow(row)};
+
+    AddEntryWidget* entryWidget {new AddEntryWidget {entryAtRow, ui->tableFood->items(), this}};
+    if (entryWidget->exec() == QDialog::Accepted) {
+        const Entry& entry {entryWidget->entry()};
+        ui->tableEntries->fillRowFromEntry(row, entry);
     }
+}
 
-    auto foodPtr = dynamic_cast<Food*>(itemIt->get());
-    const Food foodCpy {*foodPtr}; // stack copy
-    std::unique_ptr<Entry> entry {std::make_unique<Entry>(foodCpy, ui->editDate->text(), ui->spinMass->text().toDouble())};
-    ui->tableEntries->add(std::move(entry));
+void MainWindow::_deleteEntry()
+{
+    const QItemSelectionModel* selectionModel {ui->tableEntries->selectionModel()};
+    const auto rowsModel {selectionModel->selectedRows()};
+    int row {rowsModel.at(0).row()};
+
+    ui->tableEntries->removeRow(row);
+    ui->tableEntries->clearSelection();
+    ui->btnDeleteEntry->setEnabled(false);
+    ui->btnEditEntry->setEnabled(false);
 }
 
 void MainWindow::_addFood()
@@ -103,7 +93,6 @@ void MainWindow::_addFood()
     AddFoodWidget* foodWidget {new AddFoodWidget};
     if (foodWidget->exec() == QDialog::Accepted) {
         std::unique_ptr<Food> food {std::make_unique<Food>(foodWidget->food())};
-        ui->cbFood->addItem(food->name());
         ui->tableFood->add(std::move(food));
     }
 }

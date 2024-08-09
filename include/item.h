@@ -94,19 +94,21 @@ private:
 class Entry : public Item
 {
 public:
+    Entry() {}
     Entry(const Food& food, const QString& date, double mass)
+        : _food(food), _date(date), _mass(mass)
     {
-        setDate(date);
         setSaturatedFats(mass * food.saturatedFats());
         setUnsaturatedFats(mass * food.unsaturatedFats());
         setCarbohydrates(mass * food.carbohydrates());
         setProteins(mass * food.proteins());
-        _food = food;
     }
 
     Entry(const Entry& other)
     {
         _food = other._food;
+        _date = other._date;
+        _mass = other._mass;
         _unsaturatedFats = other._unsaturatedFats;
         _saturatedFats = other._saturatedFats;
         _carbohydrates = other._carbohydrates;
@@ -116,10 +118,24 @@ public:
     Entry(Entry&& other)
     {
         _food = other._food;
+        _date = other._date;
+        _mass = other._mass;
         _unsaturatedFats = other._unsaturatedFats;
         _saturatedFats = other._saturatedFats;
         _carbohydrates = other._carbohydrates;
         _proteins = other._proteins;
+    }
+
+    Entry& operator=(Entry&& other)
+    {
+        _food = other._food;
+        _date = other._date;
+        _mass = other._mass;
+        _unsaturatedFats = other._unsaturatedFats;
+        _saturatedFats = other._saturatedFats;
+        _carbohydrates = other._carbohydrates;
+        _proteins = other._proteins;
+        return *this;
     }
 
     virtual ~Entry() {}
@@ -134,6 +150,7 @@ public:
 
     void setDate(const QString& date) {_date = date;}
     void setMass(double mass) {_mass = mass;}
+    void setFood(const Food& food) {_food = food;}
 
 private:
     Food _food;

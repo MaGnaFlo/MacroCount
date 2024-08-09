@@ -30,4 +30,7 @@ public:
 
     virtual void add(std::unique_ptr<Item> item);
     virtual void setColumnsWidth();
+
+    Entry entryFromRow(int row) const;
+    void fillRowFromEntry(int row, const Entry &entry);
 };

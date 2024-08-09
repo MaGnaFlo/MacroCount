@@ -27,7 +27,7 @@ EntryTable::EntryTable(QWidget *parent) : ItemTable(parent)
 
 void EntryTable::add(std::unique_ptr<Item> item)
 {
-    std::unique_ptr<Entry> entry {dynamic_cast<Entry*>(item.release())};
+    std::unique_ptr<Entry> entry {static_cast<Entry*>(item.release())};
 
     int row {-1};
 
@@ -89,5 +89,85 @@ void EntryTable::setColumnsWidth()
     this->setColumnWidth(4, 0.15*tableWidth);
     this->setColumnWidth(5, 0.15*tableWidth);
     this->setColumnWidth(6, 0.10*tableWidth);
+}
+
+Entry EntryTable::entryFromRow(int row) const
+{
+    Entry entry;
+    for (int i = 0; i < columnCount(); ++i) {
+        EntryTable::Col col {static_cast<EntryTable::Col>(i)};
+        auto cellWidget {this->cellWidget(row, i)};
+        if (!cellWidget) {
+            continue;
+        }
+        QLabel* label {dynamic_cast<QLabel*>(cellWidget)};
+        if (!label) {
+            continue;
+        }
+
+        switch (col) {
+        case EntryTable::Col::DATE:
+            entry.setDate(label->text());
+            break;
+        case EntryTable::Col::FOOD:
+            entry.setFood(Food(label->text()));
+            break;
+        case EntryTable::Col::MASS:
+            entry.setMass(label->text().toDouble());
+            break;
+        case EntryTable::Col::UNSATFATS:
+            entry.setUnsaturatedFats(label->text().toDouble());
+            break;
+        case EntryTable::Col::SATFATS:
+            entry.setSaturatedFats(label->text().toDouble());
+            break;
+        case EntryTable::Col::CARBS:
+            entry.setCarbohydrates(label->text().toDouble());
+            break;
+        case EntryTable::Col::PROTEINS:
+            entry.setProteins(label->text().toDouble());
+            break;
+        }
+    }
+    return entry;
+}
+
+void EntryTable::fillRowFromEntry(int row, const Entry &entry)
+{
+    for (int i = 0; i < columnCount(); ++i) {
+        EntryTable::Col col {static_cast<EntryTable::Col>(i)};
+        auto cellWidget {this->cellWidget(row, i)};
+        if (!cellWidget) {
+            continue;
+        }
+        QLabel* label {dynamic_cast<QLabel*>(cellWidget)};
+        if (!label) {
+            continue;
+        }
+
+        switch (col) {
+        case EntryTable::Col::DATE:
+            label->setText(entry.date());
+            break;
+        case EntryTable::Col::FOOD:
+            label->setText(entry.food().name());
+            break;
+        case EntryTable::Col::MASS:
+            label->setText(QString::number(entry.mass()));
+            break;
+        case EntryTable::Col::UNSATFATS:
+            label->setText(QString::number(entry.unsaturatedFats()));
+            break;
+        case EntryTable::Col::SATFATS:
+            label->setText(QString::number(entry.saturatedFats()));
+            break;
+        case EntryTable::Col::CARBS:
+            label->setText(QString::number(entry.carbohydrates()));
+            break;
+        case EntryTable::Col::PROTEINS:
+            label->setText(QString::number(entry.proteins()));
+            break;
+        }
+    }
 }
 

@@ -25,7 +25,7 @@ public:
     }
     virtual void add(std::unique_ptr<Item> item) = 0;
     virtual void setColumnsWidth() {}
-    const std::vector<std::unique_ptr<Item>>& items() const {return _items;}
+    std::vector<std::unique_ptr<Item>>& items() {return _items;}
 
 protected:
     std::vector<std::unique_ptr<Item>> _items;

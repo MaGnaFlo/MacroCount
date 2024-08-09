@@ -1,5 +1,4 @@
-#ifndef ADDFOODWIDGET_H
-#define ADDFOODWIDGET_H
+#pragma once
 
 #include <QObject>
 #include <QWidget>
@@ -29,5 +28,3 @@ private:
     Food _food;
 
 };
-
-#endif // ADDFOODWIDGET_H
