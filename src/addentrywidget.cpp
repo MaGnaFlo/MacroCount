@@ -15,7 +15,7 @@ AddEntryWidget::AddEntryWidget(std::map<int, std::unique_ptr<Item> > &foods, QWi
         ui->cbFood->addItem(food->name());
     }
 
-    connect(ui->btnAddEdit, &QPushButton::clicked, this, &AddEntryWidget::validate);
+    connect(ui->btnAddEdit, &QPushButton::clicked, this, &AddEntryWidget::_validate);
     connect(ui->btnCancel, &QPushButton::clicked, this, &AddEntryWidget::reject);
 }
 
@@ -33,7 +33,7 @@ AddEntryWidget::AddEntryWidget(const Entry &entry, std::map<int, std::unique_ptr
         ui->cbFood->setCurrentText(entry.food().name()); // what if you deleted the food?
     }
 
-    connect(ui->btnAddEdit, &QPushButton::clicked, this, &AddEntryWidget::validate);
+    connect(ui->btnAddEdit, &QPushButton::clicked, this, &AddEntryWidget::_validate);
     connect(ui->btnCancel, &QPushButton::clicked, this, &AddEntryWidget::reject);
 }
 AddEntryWidget::~AddEntryWidget()
@@ -41,7 +41,7 @@ AddEntryWidget::~AddEntryWidget()
     delete ui;
 }
 
-void AddEntryWidget::validate()
+void AddEntryWidget::_validate()
 {
     const QString& foodName {ui->cbFood->currentText()};
     auto itemIt {std::find_if(_foods.cbegin(), _foods.cend(), [&foodName](const auto& foodItem)
@@ -73,7 +73,8 @@ void AddEntryWidget::validate()
 
     auto foodPtr = dynamic_cast<Food*>((*itemIt).second.get());
     const Food foodCpy {*foodPtr}; // stack copy
-    _entry = Entry(foodCpy, ui->editDate->text(), ui->spinMass->text().toDouble());
+    double mass = foodCpy.density() == 0 ? ui->spinMass->text().toDouble() : foodCpy.density() * ui->spinVolume->text().toDouble();
+    _entry = Entry(foodCpy, ui->editDate->text(), mass, ui->spinVolume->text().toDouble());
 
     this->accept();
 }

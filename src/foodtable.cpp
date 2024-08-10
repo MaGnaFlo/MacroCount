@@ -6,9 +6,8 @@
 
 FoodTable::FoodTable(QWidget *parent) : ItemTable(parent)
 {
-    this->setColumnCount(6);
     this->setRowCount(0);
-    this->verticalHeader()->setVisible(false);
+    this->setColumnCount(6);
     this->setHorizontalHeaderLabels(
         {
             "Name",
@@ -18,7 +17,6 @@ FoodTable::FoodTable(QWidget *parent) : ItemTable(parent)
             "Carbohydrates\n(%)",
             "Proteins\n(%)"
         });
-    setAttribute ( Qt::WA_TransparentForMouseEvents );
 }
 
 void FoodTable::add(std::unique_ptr<Item> item)
@@ -36,6 +34,17 @@ void FoodTable::add(std::unique_ptr<Item> item)
     setCellWidget(row, static_cast<int>(Col::PROTEINS), new QLabel {QString::number(food->proteins())});
 
     _items.insert({row, std::move(food)});
+}
+
+void FoodTable::setColumnsWidth()
+{
+    int tableWidth {this->width()};
+    this->setColumnWidth(static_cast<int>(Col::NAME), 0.3*tableWidth);
+    this->setColumnWidth(static_cast<int>(Col::DENSITY), 0.1*tableWidth);
+    this->setColumnWidth(static_cast<int>(Col::UNSATFATS), 0.15*tableWidth);
+    this->setColumnWidth(static_cast<int>(Col::SATFATS), 0.15*tableWidth);
+    this->setColumnWidth(static_cast<int>(Col::CARBS), 0.15*tableWidth);
+    this->setColumnWidth(static_cast<int>(Col::PROTEINS), 0.15*tableWidth);
 }
 
 Food FoodTable::foodFromRow(int row) const

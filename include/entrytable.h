@@ -28,8 +28,10 @@ public:
     explicit EntryTable(QWidget *parent = nullptr);
     virtual ~EntryTable() {}
 
-    virtual void add(std::unique_ptr<Item> item);
-    virtual void setColumnsWidth();
+    virtual void add(std::unique_ptr<Item> item) override;
+    virtual void setColumnsWidth() override;
+
+    void updateFood(const Food& oldFood, const Food& newFood);
 
     Entry entryFromRow(int row) const;
     void fillRowFromEntry(int row, const Entry &entry);

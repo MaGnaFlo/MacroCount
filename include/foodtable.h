@@ -27,7 +27,8 @@ public:
     explicit FoodTable(QWidget *parent = nullptr);
     virtual ~FoodTable() {}
 
-    virtual void add(std::unique_ptr<Item> item);
+    virtual void add(std::unique_ptr<Item> item) override;
+    virtual void setColumnsWidth() override;
 
     Food foodFromRow(int row) const;
     void fillRowFromFood(int row, const Food& food);

@@ -95,13 +95,13 @@ class Entry : public Item
 {
 public:
     Entry() {}
-    Entry(const Food& food, const QString& date, double mass)
-        : _food(food), _date(date), _mass(mass)
+    Entry(const Food& food, const QString& date, double mass, double volume = 0.f)
+        : _food(food), _date(date), _mass(mass), _volume(volume)
     {
-        setSaturatedFats(mass * food.saturatedFats());
-        setUnsaturatedFats(mass * food.unsaturatedFats());
-        setCarbohydrates(mass * food.carbohydrates());
-        setProteins(mass * food.proteins());
+        setSaturatedFats(0.01 * std::roundf(100 * mass * food.saturatedFats()) / 100.f);
+        setUnsaturatedFats(0.01 * std::roundf(100 * mass * food.unsaturatedFats()) / 100.f);
+        setCarbohydrates(0.01 * std::roundf(100 * mass * food.carbohydrates()) / 100.f);
+        setProteins(0.01 * std::roundf(100 * mass * food.proteins()) / 100.f);
     }
 
     Entry(const Entry& other)
@@ -109,6 +109,7 @@ public:
         _food = other._food;
         _date = other._date;
         _mass = other._mass;
+        _volume = other._volume;
         _unsaturatedFats = other._unsaturatedFats;
         _saturatedFats = other._saturatedFats;
         _carbohydrates = other._carbohydrates;
@@ -120,6 +121,7 @@ public:
         _food = other._food;
         _date = other._date;
         _mass = other._mass;
+        _volume = other._volume;
         _unsaturatedFats = other._unsaturatedFats;
         _saturatedFats = other._saturatedFats;
         _carbohydrates = other._carbohydrates;
@@ -131,6 +133,7 @@ public:
         _food = other._food;
         _date = other._date;
         _mass = other._mass;
+        _volume = other._volume;
         _unsaturatedFats = other._unsaturatedFats;
         _saturatedFats = other._saturatedFats;
         _carbohydrates = other._carbohydrates;
@@ -143,6 +146,7 @@ public:
     const QString& date() const {return _date;}
     const Food& food() const {return _food;}
     double mass() const {return _mass;}
+    double volume() const {return _volume;}
     double saturatedFats() const {return _saturatedFats;}
     double unsaturatedFats() const {return _unsaturatedFats;}
     double carbohydrates() const {return _carbohydrates;}
@@ -150,11 +154,13 @@ public:
 
     void setDate(const QString& date) {_date = date;}
     void setMass(double mass) {_mass = mass;}
+    void setVolume(double volume) {_volume = volume;}
     void setFood(const Food& food) {_food = food;}
 
 private:
     Food _food;
     QString _date;
     double _mass {0.f};
+    double _volume {0.f};
 
 };

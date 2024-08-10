@@ -10,12 +10,12 @@
 
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
     ui->tableEntries->setColumnsWidth();
+    ui->tableFood->setColumnsWidth();
 
     ui->btnAddEntry->setEnabled(true);
     ui->btnDeleteEntry->setEnabled(false);
@@ -73,8 +73,9 @@ void MainWindow::_editEntry()
     AddEntryWidget* entryWidget {new AddEntryWidget {entryAtRow, ui->tableFood->items(), this}};
     entryWidget->setWindowTitle("Edit entry");
     if (entryWidget->exec() == QDialog::Accepted) {
-        const Entry& entry {entryWidget->entry()};
-        ui->tableEntries->fillRowFromEntry(row, entry);
+        std::unique_ptr<Entry> entry {std::make_unique<Entry>(entryWidget->entry())};
+        ui->tableEntries->fillRowFromEntry(row, *entry);
+        ui->tableEntries->set(row, std::move(entry));
     }
 }
 
@@ -110,8 +111,10 @@ void MainWindow::_editFood()
     AddFoodWidget* foodWidget {new AddFoodWidget {foodAtRow}};
     foodWidget->setWindowTitle("Edit food");
     if (foodWidget->exec() == QDialog::Accepted) {
-        const Food& food {foodWidget->food()};
-        ui->tableFood->fillRowFromFood(row, food);
+        std::unique_ptr<Food> food {std::make_unique<Food>(foodWidget->food())};
+        ui->tableEntries->updateFood(foodAtRow, *food);
+        ui->tableFood->fillRowFromFood(row, *food);
+        ui->tableFood->set(row, std::move(food));
     }
 }
 

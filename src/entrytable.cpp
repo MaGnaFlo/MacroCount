@@ -19,15 +19,11 @@ EntryTable::EntryTable(QWidget *parent) : ItemTable(parent)
             "Carbohydrates\n(g)",
             "Proteins\n(g)"
         });
-
-    this->verticalHeader()->setVisible(false);
-
-    setAttribute ( Qt::WA_TransparentForMouseEvents );
 }
 
 void EntryTable::add(std::unique_ptr<Item> item)
 {
-    std::unique_ptr<Entry> entry {static_cast<Entry*>(item.release())};
+    std::unique_ptr<Entry> entry {dynamic_cast<Entry*>(item.release())};
 
     int row {-1};
 
@@ -36,6 +32,15 @@ void EntryTable::add(std::unique_ptr<Item> item)
     int m {decomposedCurrentDate.at(1).toInt()};
     int y {decomposedCurrentDate.at(2).toInt()};
     const QDate currentDate {y, m, d};
+
+    // careful: must update rows in map if insertion
+    auto displaceItems {[this](int row) {
+        for (int i = rowCount()-1; i>=row; --i) {
+                auto node = _items.extract(i);
+                node.key() = i+1;
+                _items.insert(std::move(node));
+            }}
+    };
 
     for (int i = 0; i<rowCount(); ++i) {
         QLabel* label {dynamic_cast<QLabel*>(cellWidget(i, 0))};
@@ -51,11 +56,13 @@ void EntryTable::add(std::unique_ptr<Item> item)
         if (date == currentDate) {
             int span {rowSpan(i, 0)};
             row = i+span;
+            displaceItems(row);
             this->insertRow(row);
             this->setSpan(i, 0, span+1, 1);
             break;
         } else if (date < currentDate) {
             row = i;
+            displaceItems(row);
             this->insertRow(row);
             break;
         }
@@ -74,20 +81,39 @@ void EntryTable::add(std::unique_ptr<Item> item)
     setCellWidget(row, static_cast<int>(Col::CARBS), new QLabel {QString::number(entry->carbohydrates())});
     setCellWidget(row, static_cast<int>(Col::PROTEINS), new QLabel {QString::number(entry->proteins())});
 
-    _items.insert({row, std::move(item)});
-
+    _items.insert({row, std::move(entry)});
 }
 
 void EntryTable::setColumnsWidth()
 {
     int tableWidth {this->width()};
-    this->setColumnWidth(0, 0.15*tableWidth);
-    this->setColumnWidth(1, 0.2*tableWidth);
-    this->setColumnWidth(2, 0.099*tableWidth);
-    this->setColumnWidth(3, 0.15*tableWidth);
-    this->setColumnWidth(4, 0.15*tableWidth);
-    this->setColumnWidth(5, 0.15*tableWidth);
-    this->setColumnWidth(6, 0.10*tableWidth);
+    this->setColumnWidth(static_cast<int>(Col::DATE), 0.15*tableWidth);
+    this->setColumnWidth(static_cast<int>(Col::FOOD), 0.2*tableWidth);
+    this->setColumnWidth(static_cast<int>(Col::MASS), 0.099*tableWidth);
+    this->setColumnWidth(static_cast<int>(Col::UNSATFATS), 0.15*tableWidth);
+    this->setColumnWidth(static_cast<int>(Col::SATFATS), 0.15*tableWidth);
+    this->setColumnWidth(static_cast<int>(Col::CARBS), 0.15*tableWidth);
+    this->setColumnWidth(static_cast<int>(Col::PROTEINS), 0.10*tableWidth);
+}
+
+void EntryTable::updateFood(const Food &oldFood, const Food &newFood)
+{
+    for (int row = 0; row < rowCount(); ++row) {
+        QLabel* labelName {dynamic_cast<QLabel*>(this->cellWidget(row, static_cast<int>(Col::FOOD)))};
+        if (labelName && labelName->text() == oldFood.name()) {
+            const auto& entry = static_cast<Entry*>(_items.at(row).get());
+            if (!entry) continue;
+
+            labelName->setText(newFood.name());
+            double mass = newFood.density() == 0 ? entry->mass() : newFood.density() * entry->volume();
+
+            dynamic_cast<QLabel*>(cellWidget(row, static_cast<int>(Col::MASS)))->setText(QString::number(mass));
+            dynamic_cast<QLabel*>(cellWidget(row, static_cast<int>(Col::UNSATFATS)))->setText(QString::number(0.01 * std::roundf(100 * mass * newFood.unsaturatedFats()) / 100.f));
+            dynamic_cast<QLabel*>(cellWidget(row, static_cast<int>(Col::SATFATS)))->setText(QString::number(0.01 * std::roundf(100 * mass * newFood.saturatedFats()) / 100.f));
+            dynamic_cast<QLabel*>(cellWidget(row, static_cast<int>(Col::CARBS)))->setText(QString::number(0.01 * std::roundf(100 * mass * newFood.carbohydrates()) / 100.f));
+            dynamic_cast<QLabel*>(cellWidget(row, static_cast<int>(Col::PROTEINS)))->setText(QString::number(0.01 * std::roundf(100 * mass * newFood.proteins()) / 100.f));
+        }
+    }
 }
 
 Entry EntryTable::entryFromRow(int row) const

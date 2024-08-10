@@ -21,7 +21,7 @@ public:
     const Entry& entry() const {return _entry;}
 
 private slots:
-    void validate();
+    void _validate();
 
 private:
     Ui::AddEntryWidget *ui;

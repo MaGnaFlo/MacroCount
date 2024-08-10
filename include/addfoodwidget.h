@@ -21,7 +21,8 @@ public:
     const Food& food() const {return _food;}
 
 private slots:
-    void validate();
+    void _validate();
+    void _densityCheckBox(bool);
 
 private:
     Ui::AddFoodWidget *ui;

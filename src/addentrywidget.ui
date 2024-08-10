@@ -61,7 +61,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinVolume"/>
+       <widget class="QSpinBox" name="spinVolume">
+        <property name="maximum">
+         <number>9999</number>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -75,7 +79,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinMass"/>
+       <widget class="QSpinBox" name="spinMass">
+        <property name="maximum">
+         <number>9999</number>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
