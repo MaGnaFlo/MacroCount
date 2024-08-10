@@ -24,5 +24,11 @@ void ItemTable::set(int row, std::unique_ptr<Item> item)
 void ItemTable::remove(int row)
 {
     _items.erase(row);
+    // adjust map indices accordingly
+    for (int i = row+1; i<rowCount(); ++i) {
+        auto node = _items.extract(i);
+        node.key() = i-1;
+        _items.insert(std::move(node));
+    }
     this->removeRow(row);
 }
