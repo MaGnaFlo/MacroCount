@@ -25,6 +25,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->btnDeleteFood->setEnabled(false);
     ui->btnEditFood->setEnabled(false);
 
+    ui->btnAddEntry->setIcon(QIcon{QPixmap{"../../../images/cross"}});
+    ui->btnAddEntry->setIconSize({ui->btnAddEntry->width()/2, ui->btnAddEntry->height()/2});
+    ui->btnAddFood->setIcon(QIcon{QPixmap{"../../../images/apple_white"}});
+    ui->btnAddFood->setIconSize({ui->btnAddFood->width()/2, ui->btnAddFood->height()/2});
+
     connect(ui->btnAddEntry, &QPushButton::clicked, this, &MainWindow::_addEntry);
     connect(ui->btnEditEntry, &QPushButton::clicked, this, &MainWindow::_editEntry);
     connect(ui->btnDeleteEntry, &QPushButton::clicked, this, &MainWindow::_deleteEntry);

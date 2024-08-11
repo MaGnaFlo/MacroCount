@@ -89,7 +89,7 @@ void EntryTable::setColumnsWidth()
     int tableWidth {this->width()};
     this->setColumnWidth(static_cast<int>(Col::DATE), 0.15*tableWidth);
     this->setColumnWidth(static_cast<int>(Col::FOOD), 0.2*tableWidth);
-    this->setColumnWidth(static_cast<int>(Col::MASS), 0.099*tableWidth);
+    this->setColumnWidth(static_cast<int>(Col::MASS), 0.1*tableWidth);
     this->setColumnWidth(static_cast<int>(Col::UNSATFATS), 0.15*tableWidth);
     this->setColumnWidth(static_cast<int>(Col::SATFATS), 0.15*tableWidth);
     this->setColumnWidth(static_cast<int>(Col::CARBS), 0.15*tableWidth);

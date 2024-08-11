@@ -24,7 +24,11 @@ AddEntryWidget::AddEntryWidget(const Entry &entry, std::map<int, std::unique_ptr
 {
     ui->setupUi(this);
     ui->editDate->setDate(QDate::currentDate());
-    ui->spinMass->setValue(entry.mass());
+    if (entry.food().density() == 0) {
+        ui->spinMass->setValue(entry.mass());
+    } else {
+        ui->spinVolume->setValue(entry.volume());
+    }
     ui->cbFood->addItem("Select food");
     for (const auto& [_, item] : foods) {
         auto food {dynamic_cast<Food*>(item.get())};

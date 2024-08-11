@@ -21,13 +21,23 @@ AddFoodWidget::AddFoodWidget(const Food &food, QWidget *parent)
     ui->setupUi(this);
 
     ui->lineEditFoodName->setText(food.name());
-    ui->spinDensity->setValue(food.density());
     ui->spinUnsatFatPerc->setValue(food.unsaturatedFats());
     ui->spinSatFatPerc->setValue(food.unsaturatedFats());
     ui->spinCarbsPerc->setValue(food.carbohydrates());
     ui->spinProtPerc->setValue(food.proteins());
 
+    if (food.density() == 0) {
+        ui->checkBoxDensity->setChecked(true);
+        ui->spinDensity->setEnabled(false);
+    } else {
+        ui->checkBoxDensity->setChecked(false);
+        ui->spinDensity->setEnabled(true);
+        ui->spinDensity->setValue(food.density());
+    }
+
     connect(ui->btnAddEdit, &QPushButton::clicked, this, &AddFoodWidget::_validate);
+    connect(ui->btnCancel, &QPushButton::clicked, this, &QDialog::reject);
+    connect(ui->checkBoxDensity, &QCheckBox::clicked, this, &AddFoodWidget::_densityCheckBox);
 }
 
 AddFoodWidget::~AddFoodWidget()
@@ -37,6 +47,16 @@ AddFoodWidget::~AddFoodWidget()
 
 void AddFoodWidget::_validate()
 {
+    if (ui->lineEditFoodName->text().isEmpty()) {
+        QMessageBox msgBox;
+        msgBox.setText("Food name is empty!");
+        msgBox.setInformativeText("Please enter a name for your food.");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.exec();
+        return;
+    }
+
     _food = Food(ui->lineEditFoodName->text());
     QString densityText {ui->spinDensity->text()};
     densityText.replace(",", ".");
