@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(SQLite3 REQUIRED)
 
 set(PROJECT_SOURCES
         src/main.cpp
@@ -20,6 +21,7 @@ set(PROJECT_SOURCES
         src/foodtable.cpp
         src/addfoodwidget.cpp
         src/addentrywidget.cpp
+        src/database.cpp
 
         include/mainwindow.h
         include/item.h
@@ -28,6 +30,7 @@ set(PROJECT_SOURCES
         include/foodtable.h
         include/addfoodwidget.h
         include/addentrywidget.h
+        include/database.h
 
         src/mainwindow.ui
         src/addfoodwidget.ui
@@ -39,8 +42,10 @@ qt_add_executable(MacroCount
     ${PROJECT_SOURCES}
 )
 
-target_link_libraries(MacroCount PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(MacroCount PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
+                                 PRIVATE SQLite::SQLite3)
 target_include_directories(MacroCount PUBLIC include)
+include_directories(${SQLITE3_INCLUDE_DIRS})
 
 set_target_properties(MacroCount PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
