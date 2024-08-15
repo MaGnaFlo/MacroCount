@@ -7,6 +7,7 @@
 #include "addfoodwidget.h"
 #include "entrytable.h"
 #include "addentrywidget.h"
+#include <QFileDialog>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -30,12 +31,29 @@ MainWindow::MainWindow(QWidget *parent)
     ui->btnAddFood->setIcon(QIcon{QPixmap{"../../../images/apple_white"}});
     ui->btnAddFood->setIconSize({ui->btnAddFood->width()/2, ui->btnAddFood->height()/2});
 
+    QMenu *menu {new QMenu("File")};
+    QAction *openAction {new QAction("Open")};
+    openAction->setShortcut(QKeySequence("CTRL+O"));
+    QAction *saveAction {new QAction("Save")};
+    saveAction->setShortcut(QKeySequence("CTRL+S"));
+    QAction *saveAsAction {new QAction("Save as")};
+    menu->addAction(openAction);
+    menu->addAction(saveAction);
+    menu->addAction(saveAsAction);
+    QMenuBar *menuBar {new QMenuBar};
+    menuBar->addMenu(menu);
+    this->setMenuBar(menuBar);
+
     connect(ui->btnAddEntry, &QPushButton::clicked, this, &MainWindow::_addEntry);
     connect(ui->btnEditEntry, &QPushButton::clicked, this, &MainWindow::_editEntry);
     connect(ui->btnDeleteEntry, &QPushButton::clicked, this, &MainWindow::_deleteEntry);
     connect(ui->btnAddFood, &QPushButton::clicked, this, &MainWindow::_addFood);
     connect(ui->btnEditFood, &QPushButton::clicked, this, &MainWindow::_editFood);
     connect(ui->btnDeleteFood, &QPushButton::clicked, this, &MainWindow::_deleteFood);
+
+    connect(openAction, &QAction::triggered, this, &MainWindow::_open);
+    connect(saveAction, &QAction::triggered, this, &MainWindow::_save);
+    connect(saveAsAction, &QAction::triggered, this, &MainWindow::_saveAs);
 }
 
 MainWindow::~MainWindow()
@@ -142,5 +160,56 @@ void MainWindow::_cbFoodChanged(int index) const
     } else {
         ui->btnAddEntry->setEnabled(false);
     }
+}
+
+void MainWindow::_open()
+{
+    if (!_database.isOpen()) {
+        const QString fileName {QFileDialog::getOpenFileName(this, QObject::tr("Open database"),
+                                                            QDir::currentPath(),
+                                                            QObject::tr("Database file (*.db)"))};
+        if (fileName.isEmpty()) {
+            return;
+        }
+        _database.setPath(fileName.toStdString());
+    } else {
+        _database.close(nullptr);
+    }
+
+    bool ok;
+    _database.open(&ok);
+    if (!ok) {
+        QMessageBox msgBox;
+        msgBox.setText("Error while opening the database!");
+        msgBox.setInformativeText("Could not open the database.");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.exec();
+    }
+}
+
+void MainWindow::_save()
+{
+    if (!_database.isOpen()) {
+        const QString fileName {QFileDialog::getOpenFileName(this, QObject::tr("Open database"),
+                                                            QDir::currentPath(),
+                                                            QObject::tr("Database file (*.db)"))};
+        if (fileName.isEmpty()) {
+            return;
+        }
+        _database.setPath(fileName.toStdString());
+    }
+}
+
+void MainWindow::_saveAs()
+{
+    const QString fileName {QFileDialog::getOpenFileName(this, QObject::tr("Open database"),
+                                                        QDir::currentPath(),
+                                                        QObject::tr("Database file (*.db)"))};
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    ui->tableEntries->items();
 }
 

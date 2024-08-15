@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMenuBar>
+#include "database.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -21,6 +24,7 @@ protected:
 private:
     void _initializeEntriesTable();
     Ui::MainWindow *ui;
+    sql::Database _database;
 
 private slots:
     void _addEntry();
@@ -30,6 +34,9 @@ private slots:
     void _editFood();
     void _deleteFood();
     void _cbFoodChanged(int) const;
+    void _save();
+    void _saveAs();
+    void _open();
 };
 
 #endif // MAINWINDOW_H

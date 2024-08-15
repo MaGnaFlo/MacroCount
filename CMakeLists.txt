@@ -37,9 +37,17 @@ set(PROJECT_SOURCES
         src/addentrywidget.ui
 )
 
+# app icon
+set(MACOSX_BUNDLE_ICON_FILE apple_red.icns)
+set(app_icon_macos "${CMAKE_CURRENT_SOURCE_DIR}/images/apple_red.icns")
+set_source_files_properties(${app_icon_macos} PROPERTIES
+    MACOSX_PACKAGE_LOCATION "Resources")
+
 qt_add_executable(MacroCount
+    MACOSX_BUNDLE
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
+    ${app_icon_macos}
 )
 
 target_link_libraries(MacroCount PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
