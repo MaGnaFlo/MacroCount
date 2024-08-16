@@ -23,6 +23,8 @@ protected:
 
 private:
     void _initializeEntriesTable();
+    void _writeDatabase();
+
     Ui::MainWindow *ui;
     sql::Database _database;
 
@@ -37,6 +39,7 @@ private slots:
     void _save();
     void _saveAs();
     void _open();
+    void _new();
 };
 
 #endif // MAINWINDOW_H

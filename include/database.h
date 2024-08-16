@@ -29,7 +29,11 @@ namespace sql {
     class Database
     {
     public:
+        /**
+         * @brief Default constructor
+         */
         Database() {}
+
         /**
          * @brief Constructor
          * @param path File path to database

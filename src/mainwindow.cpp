@@ -32,11 +32,14 @@ MainWindow::MainWindow(QWidget *parent)
     ui->btnAddFood->setIconSize({ui->btnAddFood->width()/2, ui->btnAddFood->height()/2});
 
     QMenu *menu {new QMenu("File")};
+    QAction *newAction {new QAction("New")};
+    newAction->setShortcut(QKeySequence("CTRL+N"));
     QAction *openAction {new QAction("Open")};
     openAction->setShortcut(QKeySequence("CTRL+O"));
     QAction *saveAction {new QAction("Save")};
     saveAction->setShortcut(QKeySequence("CTRL+S"));
     QAction *saveAsAction {new QAction("Save as")};
+    menu->addAction(newAction);
     menu->addAction(openAction);
     menu->addAction(saveAction);
     menu->addAction(saveAsAction);
@@ -51,6 +54,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnEditFood, &QPushButton::clicked, this, &MainWindow::_editFood);
     connect(ui->btnDeleteFood, &QPushButton::clicked, this, &MainWindow::_deleteFood);
 
+    connect(newAction, &QAction::triggered, this, &MainWindow::_new);
     connect(openAction, &QAction::triggered, this, &MainWindow::_open);
     connect(saveAction, &QAction::triggered, this, &MainWindow::_save);
     connect(saveAsAction, &QAction::triggered, this, &MainWindow::_saveAs);
@@ -162,6 +166,14 @@ void MainWindow::_cbFoodChanged(int index) const
     }
 }
 
+void MainWindow::_new()
+{
+    _database.close(nullptr);
+    _database.setPath("");
+    ui->tableEntries->clear();
+    ui->tableFood->clear();
+}
+
 void MainWindow::_open()
 {
     if (!_database.isOpen()) {
@@ -186,12 +198,113 @@ void MainWindow::_open()
         msgBox.setDefaultButton(QMessageBox::Ok);
         msgBox.exec();
     }
+
+    // clear tables
+    ui->tableEntries->clear();
+    ui->tableFood->clear();
+
+    // foods
+    const sql::Selection foodSelection {_database.select("Foods", {"*"}, &ok)};
+    if (!ok | !foodSelection.has_value()) return;
+
+    for (const auto& row : foodSelection.value()) {
+        std::unique_ptr<Food> food {std::make_unique<Food>()};
+        food->setName(QString::fromStdString(std::get<std::string>(row.at("Name"))));
+        food->setDensity(std::get<double>(row.at("Density")));
+        food->setUnsaturatedFats(std::get<double>(row.at("Unsaturated_fats")));
+        food->setSaturatedFats(std::get<double>(row.at("Saturated_fats")));
+        food->setCarbohydrates(std::get<double>(row.at("Carbohydrates")));
+        food->setProteins(std::get<double>(row.at("Proteins")));
+
+        ui->tableFood->add(std::move(food));
+    }
+
+    // entries
+    const sql::Selection entrySelection {_database.select("Entries", {"*"}, &ok)};
+    if (!ok | !entrySelection.has_value()) return;
+
+    for (const auto& row : entrySelection.value()) {
+        std::unique_ptr<Entry> entry {std::make_unique<Entry>()};
+        entry->setDate(QString::fromStdString(std::get<std::string>(row.at("Date"))));
+        entry->setMass(std::get<double>(row.at("Mass")));
+        entry->setMass(std::get<double>(row.at("Volume")));
+        entry->setUnsaturatedFats(std::get<double>(row.at("Unsaturated_fats")));
+        entry->setSaturatedFats(std::get<double>(row.at("Saturated_fats")));
+        entry->setCarbohydrates(std::get<double>(row.at("Carbohydrates")));
+        entry->setProteins(std::get<double>(row.at("Proteins")));
+        entry->setFood(Food{QString::fromStdString(std::get<std::string>(row.at("Food")))});
+
+        ui->tableEntries->add(std::move(entry));
+    }
+}
+
+void MainWindow::_writeDatabase()
+{
+    bool ok {true};
+    if (!_database.isOpen()) {
+        _database.open(&ok);
+    }
+    if (!ok) return;
+
+    _database.drop("Foods", nullptr);
+    _database.drop("Entries", nullptr);
+
+    // foods
+    _database.createTable("Foods", "ID INTEGER PRIMARY KEY, "
+                                   "Name TEXT NOT NULL, "
+                                   "Density REAL NOT NULL, "
+                                   "Unsaturated_fats REAL NOT NULL, "
+                                   "Saturated_fats REAL NOT NULL, "
+                                   "Carbohydrates REAL NOT NULL,"
+                                   "Proteins REAL NOT NULL",
+                          &ok);
+    if (!ok) return;
+
+    for (int i = 0; i<ui->tableFood->rowCount(); ++i) {
+        const Food food {ui->tableFood->foodFromRow(i)};
+        std::stringstream data;
+        data << i << ",";
+        data << "'" << food.name().toStdString() << "'" << ",";
+        data << food.density() << ",";
+        data << food.unsaturatedFats() << ",";
+        data << food.saturatedFats() << ",";
+        data << food.carbohydrates() << ",";
+        data << food.proteins();
+        _database.insert("Foods", data.str(), nullptr);
+    }
+
+    // entries
+    _database.createTable("Entries", "ID INTEGER PRIMARY KEY, "
+                                     "Date TEXT NOT NULL, "
+                                     "Food REAL NOT NULL, "
+                                     "Mass REAL NOT NULL, "
+                                     "Volume REAL, "
+                                     "Unsaturated_fats REAL NOT NULL, "
+                                     "Saturated_fats REAL NOT NULL, "
+                                     "Carbohydrates REAL NOT NULL,"
+                                     "Proteins REAL NOT NULL",
+                          &ok);
+
+    for (int i = 0; i<ui->tableEntries->rowCount(); ++i) {
+        const Entry entry {ui->tableEntries->entryFromRow(i)};
+        std::stringstream data;
+        data << i << ",";
+        data << "'" << entry.date().toStdString() << "'" << ",";
+        data << "'" << entry.food().name().toStdString() << "'" << ",";
+        data << entry.mass() << ",";
+        data << entry.volume() << ",";
+        data << entry.unsaturatedFats() << ",";
+        data << entry.saturatedFats() << ",";
+        data << entry.carbohydrates() << ",";
+        data << entry.proteins();
+        _database.insert("Entries", data.str(), nullptr);
+    }
 }
 
 void MainWindow::_save()
 {
     if (!_database.isOpen()) {
-        const QString fileName {QFileDialog::getOpenFileName(this, QObject::tr("Open database"),
+        const QString fileName {QFileDialog::getSaveFileName(this, QObject::tr("Save database"),
                                                             QDir::currentPath(),
                                                             QObject::tr("Database file (*.db)"))};
         if (fileName.isEmpty()) {
@@ -199,17 +312,18 @@ void MainWindow::_save()
         }
         _database.setPath(fileName.toStdString());
     }
+    _writeDatabase();
 }
 
 void MainWindow::_saveAs()
 {
-    const QString fileName {QFileDialog::getOpenFileName(this, QObject::tr("Open database"),
+    const QString fileName {QFileDialog::getSaveFileName(this, QObject::tr("Save database"),
                                                         QDir::currentPath(),
                                                         QObject::tr("Database file (*.db)"))};
     if (fileName.isEmpty()) {
         return;
     }
-
-    ui->tableEntries->items();
+     _database.setPath(fileName.toStdString());
+    _writeDatabase();
 }
 

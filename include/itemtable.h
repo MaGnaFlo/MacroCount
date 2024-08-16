@@ -23,6 +23,7 @@ public:
     virtual void add(std::unique_ptr<Item> item) = 0;
     void set(int row, std::unique_ptr<Item> item);
     void remove(int row);
+    void clear();
 
     std::map<int, std::unique_ptr<Item>>& items() {return _items;}
 

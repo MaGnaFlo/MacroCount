@@ -64,7 +64,7 @@ namespace sql {
         char* errorMsg;
         int exit = sqlite3_exec(_sqliteDB, query.c_str(), NULL, 0, &errorMsg);
         if (exit != SQLITE_OK) {
-            std::cerr << "Error creating table (" << errorMsg << ")" << std::endl;
+            std::cerr << "Error creating table (" << (errorMsg ? errorMsg : "") << ")" << std::endl;
             sqlite3_free(errorMsg);
             rc = false;
         }
@@ -83,7 +83,7 @@ namespace sql {
         char* errorMsg;
         int exit = sqlite3_exec(_sqliteDB, query.c_str(), NULL, 0, &errorMsg);
         if (exit != SQLITE_OK) {
-            std::cerr << "Error dropping table from database (" << errorMsg << ")" << std::endl;
+            std::cerr << "Error dropping table from database (" << (errorMsg ? errorMsg : "") << ")" << std::endl;
             rc = false;
         }
         sqlite3_free(errorMsg);
@@ -98,13 +98,14 @@ namespace sql {
         bool rc = true;
         std::stringstream queryBuffer;
         queryBuffer << "INSERT INTO " << table << " VALUES (" << data << ");";
+        std::cout << queryBuffer.str() << std::endl;
 
         const std::string query {queryBuffer.str()};
 
         char* errorMsg;
         int exit = sqlite3_exec(_sqliteDB, query.c_str(), NULL, 0, &errorMsg);
         if (exit != SQLITE_OK) {
-            std::cerr << "Error during insertion (" << errorMsg << ")" << std::endl;
+            std::cerr << "Error during insertion (" << (errorMsg ? errorMsg : "") << ")" << std::endl;
             rc = false;
         }
         sqlite3_free(errorMsg);
@@ -127,7 +128,7 @@ namespace sql {
         char* errorMsg;
         int exit = sqlite3_exec(_sqliteDB, query.c_str(), NULL, 0, &errorMsg);
         if (exit != SQLITE_OK) {
-            std::cerr << "Error during deletion (" << errorMsg << ")" << std::endl;
+            std::cerr << "Error during deletion (" << (errorMsg ? errorMsg : "") << ")" << std::endl;
             rc = false;
         }
         sqlite3_free(errorMsg);

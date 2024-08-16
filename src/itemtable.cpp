@@ -32,3 +32,13 @@ void ItemTable::remove(int row)
     }
     this->removeRow(row);
 }
+
+void ItemTable::clear()
+{
+    for (;;) {
+        if (this->rowCount() == 0) {
+            break;
+        }
+        this->remove(0);
+    }
+}
