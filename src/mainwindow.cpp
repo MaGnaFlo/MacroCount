@@ -171,14 +171,28 @@ void MainWindow::_cbFoodChanged(int index) const
 
 void MainWindow::_new()
 {
-    _database.close(nullptr);
-    _database.setPath("");
-    ui->tableEntries->clear();
-    ui->tableFood->clear();
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::warning(this, "Creating new table", "This will erase the current content. "
+                                                             "Do you wish to proceed?",
+                                  QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+        _database.close(nullptr);
+        _database.setPath("");
+        ui->tableEntries->clear();
+        ui->tableFood->clear();
+    }
 }
 
 void MainWindow::_open()
 {
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::warning(this, "Opening database", "Opening another database will erase the current content. "
+                                                           "Do you wish to proceed?",
+                                 QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::No) {
+        return;
+    }
+
     if (!_database.isOpen()) {
         const QString fileName {QFileDialog::getOpenFileName(this, QObject::tr("Open database"),
                                                             QDir::currentPath(),
