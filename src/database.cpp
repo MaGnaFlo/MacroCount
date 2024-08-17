@@ -98,8 +98,6 @@ namespace sql {
         bool rc = true;
         std::stringstream queryBuffer;
         queryBuffer << "INSERT INTO " << table << " VALUES (" << data << ");";
-        std::cout << queryBuffer.str() << std::endl;
-
         const std::string query {queryBuffer.str()};
 
         char* errorMsg;

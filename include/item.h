@@ -84,7 +84,7 @@ public:
 
 private:
     QString _name;
-    double _density;
+    double _density {0};
 
 };
 

@@ -22,7 +22,7 @@ AddFoodWidget::AddFoodWidget(const Food &food, QWidget *parent)
 
     ui->lineEditFoodName->setText(food.name());
     ui->spinUnsatFatPerc->setValue(food.unsaturatedFats());
-    ui->spinSatFatPerc->setValue(food.unsaturatedFats());
+    ui->spinSatFatPerc->setValue(food.saturatedFats());
     ui->spinCarbsPerc->setValue(food.carbohydrates());
     ui->spinProtPerc->setValue(food.proteins());
 

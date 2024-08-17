@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->setWindowTitle("MacroCount");
 
     ui->tableEntries->setColumnsWidth();
     ui->tableFood->setColumnsWidth();
@@ -68,11 +69,13 @@ MainWindow::~MainWindow()
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     QPoint pos = mapToGlobal(event->pos());
+    int rowFood {ui->tableFood->rowAt(pos)};
+    int rowEntry {ui->tableEntries->rowAt(pos)};
 
-    if (int row = ui->tableFood->rowAt(pos) != -1) {
+    if (ui->mainTabWidget->currentIndex() == 1 && rowFood != -1) {
         ui->btnDeleteFood->setEnabled(true);
         ui->btnEditFood->setEnabled(true);
-    } else if (int row = ui->tableEntries->rowAt(pos) != -1) {
+    } else if (ui->mainTabWidget->currentIndex() == 0 && rowEntry != -1) {
         ui->btnDeleteEntry->setEnabled(true);
         ui->btnEditEntry->setEnabled(true);
     }
@@ -227,7 +230,7 @@ void MainWindow::_open()
         std::unique_ptr<Entry> entry {std::make_unique<Entry>()};
         entry->setDate(QString::fromStdString(std::get<std::string>(row.at("Date"))));
         entry->setMass(std::get<double>(row.at("Mass")));
-        entry->setMass(std::get<double>(row.at("Volume")));
+        entry->setVolume(std::get<double>(row.at("Volume")));
         entry->setUnsaturatedFats(std::get<double>(row.at("Unsaturated_fats")));
         entry->setSaturatedFats(std::get<double>(row.at("Saturated_fats")));
         entry->setCarbohydrates(std::get<double>(row.at("Carbohydrates")));
@@ -278,7 +281,7 @@ void MainWindow::_writeDatabase()
                                      "Date TEXT NOT NULL, "
                                      "Food REAL NOT NULL, "
                                      "Mass REAL NOT NULL, "
-                                     "Volume REAL, "
+                                     "Volume REAL NOT NULL, "
                                      "Unsaturated_fats REAL NOT NULL, "
                                      "Saturated_fats REAL NOT NULL, "
                                      "Carbohydrates REAL NOT NULL,"
