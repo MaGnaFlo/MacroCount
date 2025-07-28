@@ -19,11 +19,27 @@ AddEntryWidget::AddEntryWidget(std::map<int, std::unique_ptr<Item> > &foods, QWi
     connect(ui->btnCancel, &QPushButton::clicked, this, &AddEntryWidget::reject);
 }
 
-AddEntryWidget::AddEntryWidget(const Entry &entry, std::map<int, std::unique_ptr<Item> > &foods, QWidget *parent)
+AddEntryWidget::AddEntryWidget(Entry &entry, std::map<int, std::unique_ptr<Item> > &foods, QWidget *parent)
     : QDialog(parent), ui(new Ui::AddEntryWidget), _foods(foods), _entry(entry)
 {
     ui->setupUi(this);
-    ui->editDate->setDate(QDate::currentDate());
+    ui->editDate->setDate(QDate::fromString(entry.date()));
+
+    const QString& foodName = entry.food().name();
+    auto itemIt {std::find_if(_foods.cbegin(), _foods.cend(), [&foodName](const auto& foodItem)
+                             {
+                                 const auto& food {dynamic_cast<Food*>(foodItem.second.get())};
+                                 return food->name() == foodName;
+                             }
+    )};
+
+    if (itemIt != _foods.cend()) {
+        Food* food = dynamic_cast<Food*>((*itemIt).second.get());
+        entry.setFood(*food);
+    }
+
+    ui->editDate->setDate(QDate::fromString(entry.date(), "dd/MM/yyyy"));
+
     if (entry.food().density() == 0) {
         ui->spinMass->setValue(entry.mass());
     } else {

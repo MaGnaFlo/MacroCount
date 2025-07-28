@@ -9,6 +9,9 @@
 #include "addentrywidget.h"
 #include <QFileDialog>
 
+#include <cpplotlib/figure.hpp>
+#include <QtConcurrent/QtConcurrent>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -59,6 +62,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(openAction, &QAction::triggered, this, &MainWindow::_open);
     connect(saveAction, &QAction::triggered, this, &MainWindow::_save);
     connect(saveAsAction, &QAction::triggered, this, &MainWindow::_saveAs);
+
+    connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::_computeFigure);
 }
 
 MainWindow::~MainWindow()
@@ -98,7 +103,7 @@ void MainWindow::_editEntry()
     const QItemSelectionModel* selectionModel {ui->tableEntries->selectionModel()};
     const auto rowsModel {selectionModel->selectedRows()};
     int row {rowsModel.at(0).row()};
-    const Entry entryAtRow {ui->tableEntries->entryFromRow(row)};
+    Entry entryAtRow {ui->tableEntries->entryFromRow(row)};
 
     AddEntryWidget* entryWidget {new AddEntryWidget {entryAtRow, ui->tableFood->items(), this}};
     entryWidget->setWindowTitle("Edit entry");
@@ -181,6 +186,41 @@ void MainWindow::_new()
         ui->tableEntries->clear();
         ui->tableFood->clear();
     }
+}
+
+void MainWindow::_computeFigure()
+{
+    double gSatFat {30}, gUnsatFat {20}, gCarbs {5}, gProteins {10};
+    for (int i = 0; i<ui->tableEntries->rowCount(); ++i) {
+        const Entry entry {ui->tableEntries->entryFromRow(i)};
+        gSatFat += entry.saturatedFats();
+        gUnsatFat += entry.unsaturatedFats();
+        gCarbs += entry.carbohydrates();
+        gProteins += entry.proteins();
+    }
+
+    plt::Figure figure{ui->label->width(), ui->label->height(), 100};
+
+    if (!figure.init()) {
+        std::cerr << "Could not initialize the Python interpreter." << std::endl;
+        return;
+    }
+
+    std::vector<double> x_pie {{gSatFat, gUnsatFat, gCarbs, gProteins}};
+
+    figure.addPlot(plt::PlotType::PIE, x_pie, {{"labels","['Saturated fats', 'Unsaturated fats', 'Carbs', 'Proteins']"}});
+
+
+    if (!figure.build()) {
+        std::cerr << "An Error occurred when building the figure." << std::endl;
+    }
+
+    figure.close();
+
+    QImage image{figure.data(), figure.width(), figure.height(), figure.width() * 3, QImage::Format_RGB888};
+    QPixmap pixmap {QPixmap::fromImage(image)};
+    ui->label->setPixmap(pixmap);
+
 }
 
 void MainWindow::_open()

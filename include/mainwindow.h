@@ -28,7 +28,7 @@ private:
     Ui::MainWindow *ui;
     sql::Database _database;
 
-private slots:
+private Q_SLOTS:
     void _addEntry();
     void _editEntry();
     void _deleteEntry();
@@ -40,6 +40,7 @@ private slots:
     void _saveAs();
     void _open();
     void _new();
+    void _computeFigure();
 };
 
 #endif // MAINWINDOW_H

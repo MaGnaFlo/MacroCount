@@ -16,11 +16,11 @@ class AddEntryWidget : public QDialog
 
 public:
     AddEntryWidget(std::map<int, std::unique_ptr<Item>> &foods, QWidget *parent = nullptr);
-    AddEntryWidget(const Entry& entry, std::map<int, std::unique_ptr<Item>> &foods, QWidget *parent = nullptr);
+    AddEntryWidget(Entry &entry, std::map<int, std::unique_ptr<Item>> &foods, QWidget *parent = nullptr);
     ~AddEntryWidget();
     const Entry& entry() const {return _entry;}
 
-private slots:
+private Q_SLOTS:
     void _validate();
 
 private:

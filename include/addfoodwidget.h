@@ -20,7 +20,7 @@ public:
     ~AddFoodWidget();
     const Food& food() const {return _food;}
 
-private slots:
+private Q_SLOTS:
     void _validate();
     void _densityCheckBox(bool);
 

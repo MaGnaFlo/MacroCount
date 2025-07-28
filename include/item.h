@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <iostream>
 
 /**
  * @brief General abstract item class for the tables
@@ -144,6 +145,7 @@ public:
     virtual ~Entry() {}
 
     const QString& date() const {return _date;}
+    Food& food() {return _food;}
     const Food& food() const {return _food;}
     double mass() const {return _mass;}
     double volume() const {return _volume;}
@@ -162,5 +164,13 @@ private:
     QString _date;
     double _mass {0.f};
     double _volume {0.f};
+
+    friend std::ostream& operator<<(std::ostream& os, const Entry& entry)
+    {
+        return os << entry.food().name().toStdString() << " "
+                    << entry.date().toStdString() << " "
+                    << entry.mass() << " "
+                    << entry.volume();
+    }
 
 };

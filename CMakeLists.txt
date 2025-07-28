@@ -9,9 +9,15 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Charts)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(SQLite3 REQUIRED)
+find_package(CPPlotLib REQUIRED)
+find_package(Python 3.12 COMPONENTS Development Interpreter REQUIRED)
+
+# virtual environment modules
+execute_process(COMMAND ${Python_EXECUTABLE} -m venv ${CMAKE_CURRENT_BINARY_DIR}/python_modules)
+execute_process(COMMAND ${CMAKE_CURRENT_BINARY_DIR}/python_modules/bin/pip install numpy matplotlib)
 
 set(PROJECT_SOURCES
         src/main.cpp
@@ -51,8 +57,10 @@ qt_add_executable(MacroCount
 )
 
 target_link_libraries(MacroCount PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
-                                 PRIVATE SQLite::SQLite3)
-target_include_directories(MacroCount PUBLIC include)
+                                 PRIVATE SQLite::SQLite3
+                                 PRIVATE CPPlotLib::CPPlotLib
+                                 PRIVATE ${Python_LIBRARIES})
+target_include_directories(MacroCount PUBLIC include PRIVATE ${Python_INCLUDE_DIRS})
 include_directories(${SQLITE3_INCLUDE_DIRS})
 
 set_target_properties(MacroCount PROPERTIES
@@ -71,6 +79,8 @@ install(TARGETS MacroCount
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+ADD_DEFINITIONS(-DQT_NO_KEYWORDS) # prevents clash between Qt slots and python.h
 
 qt_finalize_executable(MacroCount)
 
